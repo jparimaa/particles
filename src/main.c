@@ -1,3 +1,4 @@
+#include <cglm/cglm.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -35,6 +36,9 @@ int main()
         glfwTerminate();
         return 2;
     }
+
+    mat4 perspectiveMatrix;
+    glm_perspective(0.785398f, 4.0f / 3.0f, 0.5f, 50.0f, perspectiveMatrix);
 
     while (!glfwWindowShouldClose(window))
     {

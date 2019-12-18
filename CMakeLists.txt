@@ -8,5 +8,6 @@ add_subdirectory(external/glad/)
 file(GLOB SOURCES src/*.c include/*.h)
 add_executable(particles ${SOURCES})
 target_link_libraries(particles PRIVATE glfw glad)
+target_include_directories(particles PRIVATE external/cglm/include/)
 set_property(TARGET particles PROPERTY C_STANDARD 99)
 
