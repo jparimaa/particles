@@ -255,3 +255,9 @@ paket-files/
 *.sln.iml
 
 [Bb]uild
+
+# Custom
+Makefile
+*.a
+cmake_install.cmake
+CMakeFiles

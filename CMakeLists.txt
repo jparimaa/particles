@@ -11,9 +11,7 @@ target_link_libraries(particles PRIVATE glfw glad)
 target_include_directories(particles PRIVATE external/cglm/include/ include/)
 set_property(TARGET particles PROPERTY C_STANDARD 99)
 
-add_definitions(
-    -DSHADER_PATH=${CMAKE_CURRENT_SOURCE_DIR}/shaders/
-)
+add_definitions(-DSHADER_PATH="${CMAKE_CURRENT_SOURCE_DIR}/shaders/")
 
 if (MSVC)
     target_compile_options(particles PRIVATE /W3 /WX /MP)

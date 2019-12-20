@@ -44,7 +44,7 @@ static bool createShader(const char* filename, GLuint* shaderOut)
     }
 
     return true;
-};
+}
 
 static bool compileShader(const char* filename, GLuint shader)
 {
@@ -67,7 +67,8 @@ static bool compileShader(const char* filename, GLuint shader)
     fread(shaderSource, sizeof(GLchar), numBytes, file);
     fclose(file);
 
-    glShaderSource(shader, 1, &shaderSource, NULL);
+    const GLchar* const ss = shaderSource;
+    glShaderSource(shader, 1, &ss, NULL);
     free(shaderSource);
 
     glCompileShader(shader);
@@ -81,7 +82,7 @@ static bool compileShader(const char* filename, GLuint shader)
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &maxLength);
         char* errorMessage = malloc(maxLength * sizeof(char));
         glGetShaderInfoLog(shader, maxLength, &maxLength, errorMessage);
-        printf(errorMessage);
+        printf("%s\n", errorMessage);
         free(errorMessage);
     }
 
@@ -101,7 +102,7 @@ static bool linkProgram(GLuint program)
         glGetProgramiv(program, GL_INFO_LOG_LENGTH, &maxLength);
         char* errorMessage = malloc(maxLength * sizeof(char));
         glGetProgramInfoLog(program, maxLength, &maxLength, errorMessage);
-        printf(errorMessage);
+        printf("%s\n", errorMessage);
         free(errorMessage);
         return false;
     }

@@ -1,4 +1,5 @@
 #include "shader.h"
+#include "macros.h"
 
 #include <cglm/cglm.h>
 #include <glad/glad.h>
@@ -6,12 +7,6 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-
-#define CAT(a, b) a##b
-#define XCAT(A, B) CAT(A, B)
-
-#define STR(s) #s
-#define XSTR(s) STR(s)
 
 void processInput(GLFWwindow* window)
 {
@@ -41,6 +36,7 @@ int main()
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         printf("ERROR: Failed to create GLAD");
+        glfwDestroyWindow(window);
         glfwTerminate();
         return 2;
     }
@@ -48,8 +44,9 @@ int main()
     mat4 perspectiveMatrix;
     glm_perspective(0.785398f, 4.0f / 3.0f, 0.5f, 50.0f, perspectiveMatrix);
 
-    const char* files[] = {XSTR(XCAT(SHADER_PATH, simple.vert)), XSTR(XCAT(SHADER_PATH, simple.frag))};
+    const char* files[] = {CREATE_PATH(SHADER_PATH, "simple.vert"), CREATE_PATH(SHADER_PATH, "simple.frag")};
     GLuint shaderProgram = createShaderProgram(2, files);
+
     glUseProgram(shaderProgram);
 
     while (!glfwWindowShouldClose(window))
@@ -63,6 +60,7 @@ int main()
         glfwPollEvents();
     }
 
+    glfwDestroyWindow(window);
     glfwTerminate();
     return 0;
 }
