@@ -1,6 +1,7 @@
 #include "shader.h"
 #include "macros.h"
 #include "helpers.h"
+#include "camera.h"
 
 #include <cglm/cglm.h>
 #include <glad/glad.h>
@@ -63,13 +64,10 @@ int main()
         return 1;
     }
 
-    mat4 perspectiveMatrix;
-    glm_perspective(0.785398f, 4.0f / 3.0f, 0.5f, 50.0f, perspectiveMatrix);
-
     // clang-format off
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f, // left
         0.5f, -0.5f, 0.0f, // right
+        -0.5f, -0.5f, 0.0f, // left
         0.0f, 0.5f, 0.0f // top
     };
     // clang-format on
@@ -94,11 +92,26 @@ int main()
     glUseProgram(shaderProgram);
     glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
 
+    Camera camera;
+    initCamera(&camera);
+    camera.transform.position[0] = 1.0f;
+    camera.transform.position[2] = 5.0f;
+    mat4 projectionMatrix;
+    getProjectionMatrix(&camera, projectionMatrix);
+
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
-
+        
         glClear(GL_COLOR_BUFFER_BIT);
+
+        mat4 wvpMatrix;
+        mat4 viewMatrix;
+        getViewMatrix(&camera, viewMatrix);
+        mat4 worldMatrix = GLM_MAT4_IDENTITY_INIT;
+        glm_mat4_mulN((mat4* []){&projectionMatrix, &viewMatrix, &worldMatrix}, 3, wvpMatrix);
+
+        glUniformMatrix4fv(0, 1, GL_FALSE, wvpMatrix[0]);
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
