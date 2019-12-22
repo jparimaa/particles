@@ -43,10 +43,13 @@ void getForward(const Transform* t, vec3 forward)
     mat4 rotationMatrix;
     glm_euler((float*)t->rotation, rotationMatrix);
 
-    glm_vec4_zero(forward);
-    glm_vec4_copy3((float*)FORWARD, forward);
+    vec4 f = GLM_VEC4_ZERO_INIT;
+    f[0] = FORWARD[0];
+    f[1] = FORWARD[1];
+    f[2] = FORWARD[2];
 
-    glm_mat4_mulv(rotationMatrix, forward, forward);
+    glm_mat4_mulv(rotationMatrix, f, f);
+    glm_vec4_copy3(f, forward);
 }
 
 void getUp(const Transform* t, vec3 up)
@@ -54,8 +57,11 @@ void getUp(const Transform* t, vec3 up)
     mat4 rotationMatrix;
     glm_euler((float*)t->rotation, rotationMatrix);
 
-    glm_vec4_zero(up);
-    glm_vec4_copy3((float*)UP, up);
+    vec4 u = GLM_VEC4_ZERO_INIT;
+    u[0] = UP[0];
+    u[1] = UP[1];
+    u[2] = UP[2];
 
-    glm_mat4_mulv(rotationMatrix, up, up);
+    glm_mat4_mulv(rotationMatrix, u, u);
+    glm_vec4_copy3(u, up);
 }
