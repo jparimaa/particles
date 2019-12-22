@@ -17,7 +17,7 @@ void processInput(GLFWwindow* window)
     }
 }
 
-int main()
+bool initialize(GLFWwindow** window)
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
@@ -25,22 +25,22 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
 
-    GLFWwindow* window = glfwCreateWindow(1024, 764, "GL", NULL, NULL);
-    if (!window)
+    *window = glfwCreateWindow(1024, 764, "GL", NULL, NULL);
+    if (!*window)
     {
         printf("ERROR: Failed to create GLFW window");
         glfwTerminate();
-        return 1;
+        return false;
     }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(*window);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
         printf("ERROR: Failed to create GLAD");
-        glfwDestroyWindow(window);
+        glfwDestroyWindow(*window);
         glfwTerminate();
-        return 2;
+        return false;
     }
 
     if (glDebugMessageCallback)
@@ -52,20 +52,56 @@ int main()
         glDebugMessageCallback(glDebugCallback, NULL);
     }
 
+    return true;
+}
+
+int main()
+{
+    GLFWwindow* window = NULL;
+    if (!initialize(&window))
+    {
+        return 1;
+    }
+
     mat4 perspectiveMatrix;
     glm_perspective(0.785398f, 4.0f / 3.0f, 0.5f, 50.0f, perspectiveMatrix);
 
+    // clang-format off
+    float vertices[] = {
+        -0.5f, -0.5f, 0.0f, // left
+        0.5f, -0.5f, 0.0f, // right
+        0.0f, 0.5f, 0.0f // top
+    };
+    // clang-format on
+
+    // Create buffer
+    unsigned int VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
+    glEnableVertexAttribArray(0);
+
+    // Create shader
     const char* files[] = {CREATE_PATH(SHADER_PATH, "simple.vert"), CREATE_PATH(SHADER_PATH, "simple.frag")};
     GLuint shaderProgram = createShaderProgram(2, files);
 
     glUseProgram(shaderProgram);
+    glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
 
     while (!glfwWindowShouldClose(window))
     {
         processInput(window);
 
-        glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
+
+        glBindVertexArray(VAO);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

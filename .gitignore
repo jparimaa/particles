@@ -261,3 +261,4 @@ Makefile
 *.a
 cmake_install.cmake
 CMakeFiles
+*.sh

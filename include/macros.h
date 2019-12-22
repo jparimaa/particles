@@ -9,4 +9,6 @@
 
 #define CREATE_PATH(path, file) path "/" file
 
+#define UNUSED(x) (void)(x)
+
 #endif
