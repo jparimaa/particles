@@ -11,13 +11,14 @@ struct Transform
 };
 typedef struct Transform Transform;
 
-void initTransform(Transform* t);
+void transform_init(Transform* t);
 
-void move(Transform* t, vec3 v);
-void rotate(Transform* t, float angle, vec3 axis);
+void transform_move(Transform* t, vec3 v);
+void transform_rotate(Transform* t, float angle, vec3 axis);
 
-void getModelMatrix(const Transform* t, mat4 modelMatrix);
-void getForward(const Transform* t, vec3 forward);
-void getUp(const Transform* t, vec3 up);
+void transform_getModelMatrix(const Transform* t, mat4 modelMatrix);
+void transform_getForward(const Transform* t, vec3 forward);
+void transform_getUp(const Transform* t, vec3 up);
+void transform_getRight(const Transform* t, vec3 right);
 
 #endif

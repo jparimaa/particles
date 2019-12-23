@@ -4,24 +4,38 @@ static const vec3 FORWARD = {0.0f, 0.0f, -1.0f};
 static const vec3 UP = {0.0f, 1.0f, 0.0f};
 static const vec3 RIGHT = {1.0f, 0.0f, 0.0f};
 
-void initTransform(Transform* t)
+static void transform_getDirectionVector(const Transform* t, const vec3 dir, vec3 out)
+{
+    mat4 rotationMatrix;
+    glm_euler((float*)t->rotation, rotationMatrix);
+
+    vec4 v = GLM_VEC4_ZERO_INIT;
+    v[0] = dir[0];
+    v[1] = dir[1];
+    v[2] = dir[2];
+
+    glm_mat4_mulv(rotationMatrix, v, v);
+    glm_vec4_copy3(v, out);
+}
+
+void transform_init(Transform* t)
 {
     glm_vec3_zero(t->position);
     glm_vec3_zero(t->rotation);
     glm_vec3_one(t->scale);
 }
 
-void move(Transform* t, vec3 v)
+void transform_move(Transform* t, vec3 v)
 {
     glm_vec3_add(t->position, v, t->position);
 }
 
-void rotate(Transform* t, float angle, vec3 axis)
+void transform_rotate(Transform* t, float angle, vec3 axis)
 {
     glm_vec3_rotate(t->rotation, angle, axis);
 }
 
-void getModelMatrix(const Transform* t, mat4 modelMatrix)
+void transform_getModelMatrix(const Transform* t, mat4 modelMatrix)
 {
     mat4 scaleMatrix = GLM_MAT4_IDENTITY_INIT;
     glm_scale(modelMatrix, (float*)t->scale);
@@ -38,30 +52,17 @@ void getModelMatrix(const Transform* t, mat4 modelMatrix)
     glm_mat4_mul(modelMatrix, translationMatrix, modelMatrix);
 }
 
-void getForward(const Transform* t, vec3 forward)
+void transform_getForward(const Transform* t, vec3 forward)
 {
-    mat4 rotationMatrix;
-    glm_euler((float*)t->rotation, rotationMatrix);
-
-    vec4 f = GLM_VEC4_ZERO_INIT;
-    f[0] = FORWARD[0];
-    f[1] = FORWARD[1];
-    f[2] = FORWARD[2];
-
-    glm_mat4_mulv(rotationMatrix, f, f);
-    glm_vec4_copy3(f, forward);
+    transform_getDirectionVector(t, FORWARD, forward);
 }
 
-void getUp(const Transform* t, vec3 up)
+void transform_getUp(const Transform* t, vec3 up)
 {
-    mat4 rotationMatrix;
-    glm_euler((float*)t->rotation, rotationMatrix);
+    transform_getDirectionVector(t, UP, up);
+}
 
-    vec4 u = GLM_VEC4_ZERO_INIT;
-    u[0] = UP[0];
-    u[1] = UP[1];
-    u[2] = UP[2];
-
-    glm_mat4_mulv(rotationMatrix, u, u);
-    glm_vec4_copy3(u, up);
+void transform_getRight(const Transform* t, vec3 right)
+{
+    transform_getDirectionVector(t, RIGHT, right);
 }

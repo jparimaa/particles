@@ -6,7 +6,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-static bool createShader(const char* filename, GLuint* shaderOut)
+static bool shader_create(const char* filename, GLuint* shaderOut)
 {
     GLenum type = 0;
     if (strstr(filename, ".vert") != NULL)
@@ -46,7 +46,7 @@ static bool createShader(const char* filename, GLuint* shaderOut)
     return true;
 }
 
-static bool compileShader(const char* filename, GLuint shader)
+static bool shader_compile(const char* filename, GLuint shader)
 {
     FILE* file = fopen(filename, "r");
     if (file == NULL)
@@ -89,7 +89,7 @@ static bool compileShader(const char* filename, GLuint shader)
     return isCompiled == GL_TRUE;
 }
 
-static bool linkProgram(GLuint program)
+static bool shader_linkProgram(GLuint program)
 {
     glLinkProgram(program);
     GLint isLinked = 0;
@@ -109,7 +109,7 @@ static bool linkProgram(GLuint program)
     return true;
 }
 
-static void deleteShaders(int numShaders, GLuint* shaders, GLuint program)
+static void shader_delete(int numShaders, GLuint* shaders, GLuint program)
 {
     for (int i = 0; i < numShaders; ++i)
     {
@@ -118,7 +118,7 @@ static void deleteShaders(int numShaders, GLuint* shaders, GLuint program)
     }
 }
 
-GLuint createShaderProgram(int numFiles, const char** files)
+GLuint shader_createProgram(int numFiles, const char** files)
 {
     GLuint program = glCreateProgram();
 
@@ -134,13 +134,13 @@ GLuint createShaderProgram(int numFiles, const char** files)
     {
         GLuint shader;
 
-        if (!createShader(files[i], &shader))
+        if (!shader_create(files[i], &shader))
         {
             failed = true;
             break;
         }
 
-        if (!compileShader(files[i], shader))
+        if (!shader_compile(files[i], shader))
         {
             failed = true;
             break;
@@ -150,21 +150,21 @@ GLuint createShaderProgram(int numFiles, const char** files)
         glAttachShader(program, shader);
     }
 
-    if (failed || !linkProgram(program))
+    if (failed || !shader_linkProgram(program))
     {
-        deleteShaders(numFiles, shaders, program);
+        shader_delete(numFiles, shaders, program);
         glDeleteProgram(program);
         free(shaders);
         return 0;
     }
 
-    deleteShaders(numFiles, shaders, program);
+    shader_delete(numFiles, shaders, program);
     free(shaders);
 
     return program;
 }
 
-void deleteShaderProgram(GLuint program)
+void shader_deleteProgram(GLuint program)
 {
     glDeleteProgram(program);
 }

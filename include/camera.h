@@ -15,9 +15,9 @@ struct Camera
 };
 typedef struct Camera Camera;
 
-void initCamera(Camera* camera);
+void camera_init(Camera* camera);
 
-void getViewMatrix(const Camera* camera, mat4 viewMatrix);
-void getProjectionMatrix(const Camera* camera, mat4 projectionMatrix);
+void camera_getViewMatrix(const Camera* camera, mat4 viewMatrix);
+void camera_getProjectionMatrix(const Camera* camera, mat4 projectionMatrix);
 
 #endif

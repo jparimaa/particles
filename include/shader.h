@@ -3,7 +3,7 @@
 
 #include <glad/glad.h>
 
-GLuint createShaderProgram(int numFiles, const char** files);
-void deleteShaderProgram(GLuint program);
+GLuint shader_createProgram(int numFiles, const char** files);
+void shader_deleteProgram(GLuint program);
 
 #endif

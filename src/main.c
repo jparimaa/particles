@@ -2,6 +2,8 @@
 #include "macros.h"
 #include "helpers.h"
 #include "camera.h"
+#include "camera_controller.h"
+#include "input.h"
 
 #include <cglm/cglm.h>
 #include <glad/glad.h>
@@ -9,14 +11,6 @@
 
 #include <stdio.h>
 #include <stdbool.h>
-
-void processInput(GLFWwindow* window)
-{
-    if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    {
-        glfwSetWindowShouldClose(window, true);
-    }
-}
 
 bool initialize(GLFWwindow** window)
 {
@@ -87,27 +81,45 @@ int main()
 
     // Create shader
     const char* files[] = {CREATE_PATH(SHADER_PATH, "simple.vert"), CREATE_PATH(SHADER_PATH, "simple.frag")};
-    GLuint shaderProgram = createShaderProgram(2, files);
+    GLuint shaderProgram = shader_createProgram(2, files);
 
     glUseProgram(shaderProgram);
     glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
 
     Camera camera;
-    initCamera(&camera);
+    camera_init(&camera);
     camera.transform.position[0] = 1.0f;
     camera.transform.position[2] = 5.0f;
     mat4 projectionMatrix;
-    getProjectionMatrix(&camera, projectionMatrix);
+    camera_getProjectionMatrix(&camera, projectionMatrix);
+
+    Input input;
+    input_init(&input, window);
+
+    CameraController cameraController;
+    cameraController_init(&cameraController, &camera, &input);
+
+    float previousTime = 0.0;
 
     while (!glfwWindowShouldClose(window))
     {
-        processInput(window);
-        
+        float currentTime = (float)glfwGetTime();
+        float timeDelta = currentTime - previousTime;
+        previousTime = currentTime;
+
+        input_update(&input);
+        cameraController_update(&cameraController, timeDelta);
+
+        if (input.keyReleased[GLFW_KEY_ESCAPE])
+        {
+            glfwSetWindowShouldClose(window, true);
+        }
+
         glClear(GL_COLOR_BUFFER_BIT);
 
         mat4 wvpMatrix;
         mat4 viewMatrix;
-        getViewMatrix(&camera, viewMatrix);
+        camera_getViewMatrix(&camera, viewMatrix);
         mat4 worldMatrix = GLM_MAT4_IDENTITY_INIT;
         glm_mat4_mulN((mat4* []){&projectionMatrix, &viewMatrix, &worldMatrix}, 3, wvpMatrix);
 
