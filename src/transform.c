@@ -1,13 +1,13 @@
 #include "transform.h"
 
-static const vec3 FORWARD = {0.0f, 0.0f, -1.0f};
-static const vec3 UP = {0.0f, 1.0f, 0.0f};
-static const vec3 RIGHT = {1.0f, 0.0f, 0.0f};
+const vec3 FORWARD = {0.0f, 0.0f, -1.0f};
+const vec3 UP = {0.0f, 1.0f, 0.0f};
+const vec3 RIGHT = {1.0f, 0.0f, 0.0f};
 
 static void transform_getDirectionVector(const Transform* t, const vec3 dir, vec3 out)
 {
     mat4 rotationMatrix;
-    glm_euler((float*)t->rotation, rotationMatrix);
+    glm_euler_yxz((float*)t->rotation, rotationMatrix);
 
     vec4 v = GLM_VEC4_ZERO_INIT;
     v[0] = dir[0];
@@ -32,7 +32,9 @@ void transform_move(Transform* t, vec3 v)
 
 void transform_rotate(Transform* t, float angle, vec3 axis)
 {
-    glm_vec3_rotate(t->rotation, angle, axis);
+    vec3 v;
+    glm_vec3_scale(axis, angle, v);
+    glm_vec3_add(t->rotation, v, t->rotation);
 }
 
 void transform_getModelMatrix(const Transform* t, mat4 modelMatrix)

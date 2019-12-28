@@ -29,6 +29,7 @@ bool initialize(GLFWwindow** window)
     }
 
     glfwMakeContextCurrent(*window);
+    glfwSetWindowPos(*window, 200, 200);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -88,7 +89,7 @@ int main()
 
     Camera camera;
     camera_init(&camera);
-    camera.transform.position[0] = 1.0f;
+    camera.transform.position[0] = 0.0f;
     camera.transform.position[2] = 5.0f;
     mat4 projectionMatrix;
     camera_getProjectionMatrix(&camera, projectionMatrix);

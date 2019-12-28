@@ -11,6 +11,10 @@ struct Transform
 };
 typedef struct Transform Transform;
 
+extern const vec3 FORWARD;
+extern const vec3 UP;
+extern const vec3 RIGHT;
+
 void transform_init(Transform* t);
 
 void transform_move(Transform* t, vec3 v);

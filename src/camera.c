@@ -11,17 +11,15 @@ void camera_init(Camera* camera)
 
 void camera_getViewMatrix(const Camera* camera, mat4 viewMatrix)
 {
+    glm_mat4_zero(viewMatrix);
+
     vec3 forward;
     transform_getForward(&camera->transform, forward);
-
-    vec3 lookAt;
-    glm_vec3_copy((float*)camera->transform.position, lookAt);
-    glm_vec3_add(forward, lookAt, lookAt);
 
     vec3 up;
     transform_getUp(&camera->transform, up);
 
-    glm_lookat((float*)camera->transform.position, lookAt, up, viewMatrix);
+    glm_look((float*)camera->transform.position, forward, up, viewMatrix);
 }
 
 void camera_getProjectionMatrix(const Camera* camera, mat4 projectionMatrix)

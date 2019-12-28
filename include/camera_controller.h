@@ -9,6 +9,7 @@ struct CameraController
     Camera* camera;
     Input* input;
     float movementSpeed;
+    float mouseSensitivity;
 };
 typedef struct CameraController CameraController;
 
