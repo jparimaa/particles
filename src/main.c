@@ -8,6 +8,8 @@
 #include <cglm/cglm.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -87,6 +89,30 @@ int main()
     glUseProgram(shaderProgram);
     glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
 
+    // Load image
+    const char* imagePath = CREATE_PATH(ASSET_PATH, "green_square.png");
+    int width = 0;
+    int height = 0;
+    int channels = 0;
+    stbi_uc* imageData = stbi_load(imagePath, &width, &height, &channels, 4);
+    GLuint texture;
+    if (!imageData)
+    {
+        printf("ERROR: Failed to load image %s\n", imagePath);
+    }
+    else
+    {
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+        glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGBA8, width, height);
+        glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
+
+    stbi_image_free(imageData);
+
+    // Setup utilities
     Camera camera;
     camera_init(&camera);
     camera.transform.position[0] = 0.0f;
@@ -126,12 +152,20 @@ int main()
 
         glUniformMatrix4fv(0, 1, GL_FALSE, wvpMatrix[0]);
 
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
+
+    glDeleteTextures(1, &texture);
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    shader_deleteProgram(shaderProgram);
 
     glfwDestroyWindow(window);
     glfwTerminate();

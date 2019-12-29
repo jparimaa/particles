@@ -1,8 +1,10 @@
 #version 450 core
 
+layout (binding = 0) uniform sampler2D tex;
+
 out vec4 color;
 
 void main()
 {
-	color = vec4(0.2f, 1.0f, 0.3f, 1.0f);
+	color = texture(tex, vec2(0.0f, 0.0f));
 } 
