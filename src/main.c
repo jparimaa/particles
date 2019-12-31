@@ -8,11 +8,15 @@
 #include <cglm/cglm.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#pragma GCC diagnostic push 
-#pragma GCC diagnostic ignored "-Wtype-limits"
 #define STB_IMAGE_IMPLEMENTATION
+#ifdef _MSC_VER
+#include <stb_image.h>
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #include <stb_image.h>
 #pragma GCC diagnostic pop
+#endif
 
 #include <stdio.h>
 #include <stdbool.h>
