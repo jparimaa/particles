@@ -3,6 +3,7 @@
 #include "helpers.h"
 #include "camera.h"
 #include "camera_controller.h"
+#include "particle_manager.h"
 #include "input.h"
 
 #include <cglm/cglm.h>
@@ -133,6 +134,9 @@ int main()
     CameraController cameraController;
     cameraController_init(&cameraController, &camera, &input);
 
+    ParticleManager particleManager;
+    particle_manager_init(&particleManager);
+
     float previousTime = 0.0;
 
     while (!glfwWindowShouldClose(window))
@@ -143,6 +147,7 @@ int main()
 
         input_update(&input);
         cameraController_update(&cameraController, timeDelta);
+        particle_manager_update(&particleManager, timeDelta);
 
         if (input.keyReleased[GLFW_KEY_ESCAPE])
         {
@@ -164,6 +169,8 @@ int main()
 
         glBindVertexArray(VAO);
         glDrawArrays(GL_TRIANGLES, 0, 3);
+
+        particle_manager_render(&particleManager);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
