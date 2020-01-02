@@ -37,21 +37,18 @@ void transform_rotate(Transform* t, float angle, vec3 axis)
     glm_vec3_add(t->rotation, v, t->rotation);
 }
 
-void transform_getModelMatrix(const Transform* t, mat4 modelMatrix)
+void transform_getWorldMatrix(const Transform* t, mat4 worldMatrix)
 {
     mat4 scaleMatrix = GLM_MAT4_IDENTITY_INIT;
-    glm_scale(modelMatrix, (float*)t->scale);
+    glm_scale(scaleMatrix, (float*)t->scale);
 
     mat4 rotationMatrix;
     glm_euler((float*)t->rotation, rotationMatrix);
 
-    mat4 translationMatrix;
+    mat4 translationMatrix = GLM_MAT4_IDENTITY_INIT;
     glm_translate(translationMatrix, (float*)t->position);
 
-    glm_mat4_identity(modelMatrix);
-    glm_mat4_mul(modelMatrix, scaleMatrix, modelMatrix);
-    glm_mat4_mul(modelMatrix, rotationMatrix, modelMatrix);
-    glm_mat4_mul(modelMatrix, translationMatrix, modelMatrix);
+    glm_mat4_mulN((mat4* []){&translationMatrix, &rotationMatrix, &scaleMatrix}, 3, worldMatrix);
 }
 
 void transform_getForward(const Transform* t, vec3 forward)
