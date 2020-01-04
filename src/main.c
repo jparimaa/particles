@@ -74,7 +74,7 @@ int main()
     cameraController_init(&cameraController, &camera, &input);
 
     ParticleManager particleManager;
-    particle_manager_init(&particleManager);
+    particle_manager_init(&particleManager, 100);
 
     float previousTime = 0.0;
 
