@@ -10,6 +10,7 @@ void particle_manager_init(ParticleManager* particleManager, int maxParticleCoun
     particleManager->maxParticleCount = maxParticleCount;
     particleManager->particleCount = 10;
     particleManager->particles = malloc(sizeof(Particle) * maxParticleCount);
+
     for (int i = 0; i < particleManager->particleCount; ++i)
     {
         particle_init(&particleManager->particles[i]);
@@ -28,7 +29,7 @@ void particle_manager_deinit(ParticleManager* particleManager)
     free(particleManager->particles);
 }
 
-void particle_manager_update(ParticleManager* particleManager, float timeDelta, const Camera* camera)
+void particle_manager_update(ParticleManager* particleManager, float timeDelta)
 {
     for (int i = 0; i < particleManager->particleCount; ++i)
     {
@@ -38,10 +39,10 @@ void particle_manager_update(ParticleManager* particleManager, float timeDelta, 
         glm_vec3_add(p->transform.position, movement, p->transform.position);
     }
 
-    particle_renderer_update(&particleManager->particleRenderer, camera, particleManager->particles, particleManager->particleCount);
+    particle_renderer_update(&particleManager->particleRenderer, particleManager->particles, particleManager->particleCount);
 }
 
-void particle_manager_render(ParticleManager* particleManager)
+void particle_manager_render(ParticleManager* particleManager, const Camera* camera)
 {
-    particle_renderer_render(&particleManager->particleRenderer, particleManager->particleCount);
+    particle_renderer_render(&particleManager->particleRenderer, camera, particleManager->particleCount);
 }

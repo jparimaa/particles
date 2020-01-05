@@ -18,7 +18,7 @@ typedef struct ParticleManager ParticleManager;
 
 void particle_manager_init(ParticleManager* particleManager, int maxParticleCount);
 void particle_manager_deinit(ParticleManager* particleManager);
-void particle_manager_update(ParticleManager* particleManager, float timeDelta, const Camera* camera);
-void particle_manager_render(ParticleManager* particleManager);
+void particle_manager_update(ParticleManager* particleManager, float timeDelta);
+void particle_manager_render(ParticleManager* particleManager, const Camera* camera);
 
 #endif

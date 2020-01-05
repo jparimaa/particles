@@ -2,15 +2,24 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec2 uv;
 
-layout (std430, binding = 0) readonly buffer WVP
+layout (location = 0) uniform mat4 viewProjectionMatrix;
+layout (location = 1) uniform vec3 cameraUp;
+layout (location = 2) uniform vec3 cameraRight;
+
+layout (std430, binding = 0) readonly buffer PositionSizeBuffer
 {
-    mat4 wvpMatrices[];
+    vec4 positionAndSize[];
 };
 
 out vec2 texCoord;
 
 void main()
 {
-	gl_Position = wvpMatrices[gl_InstanceID] * vec4(position, 1.0);
+    vec3 vertexPosition = 
+        positionAndSize[gl_InstanceID].xyz +
+		cameraRight * position.x * positionAndSize[gl_InstanceID].w +
+		cameraUp * position.y * positionAndSize[gl_InstanceID].w;
+
+	gl_Position = viewProjectionMatrix * vec4(vertexPosition, 1.0);
     texCoord = uv;
 }

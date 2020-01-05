@@ -83,12 +83,12 @@ int main()
 
         input_update(&input);
         cameraController_update(&cameraController, timeDelta);
-        particle_manager_update(&particleManager, timeDelta, &camera);
+        particle_manager_update(&particleManager, timeDelta);
 
         glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        particle_manager_render(&particleManager);
+        particle_manager_render(&particleManager, &camera);
 
         glfwSwapBuffers(window);
         glfwPollEvents();

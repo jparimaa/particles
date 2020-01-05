@@ -12,7 +12,7 @@
 #pragma GCC diagnostic pop
 #endif
 
-static const int MATRIX_SIZE = 16 * sizeof(float);
+static const int BUFFER_ELEMENT_SIZE = 4 * sizeof(float);
 
 void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount)
 {
@@ -67,10 +67,10 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     stbi_image_free(imageData);
 
     // Create wvp buffer
-    glGenBuffers(1, &particleRenderer->wvpBuffer);
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->wvpBuffer);
-    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleRenderer->wvpBuffer);
-    glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * MATRIX_SIZE, NULL, GL_MAP_WRITE_BIT);
+    glGenBuffers(1, &particleRenderer->positionAndSizeBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->positionAndSizeBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleRenderer->positionAndSizeBuffer);
+    glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * BUFFER_ELEMENT_SIZE, NULL, GL_MAP_WRITE_BIT);
 }
 
 void particle_renderer_deinit(ParticleRenderer* particleRenderer)
@@ -78,54 +78,59 @@ void particle_renderer_deinit(ParticleRenderer* particleRenderer)
     glDeleteTextures(1, &particleRenderer->sprite);
     glDeleteVertexArrays(1, &particleRenderer->VAO);
     glDeleteBuffers(1, &particleRenderer->VBO);
-    glDeleteBuffers(1, &particleRenderer->wvpBuffer);
+    glDeleteBuffers(1, &particleRenderer->positionAndSizeBuffer);
     shader_deleteProgram(particleRenderer->shader);
 }
 
-void particle_renderer_update(ParticleRenderer* particleRenderer, const Camera* camera, const Particle* particles, int particleCount)
+void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int particleCount)
 {
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->wvpBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->positionAndSizeBuffer);
     GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
-    mat4* wvpBuffer = (mat4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, particleCount * MATRIX_SIZE, access);
-
-    mat4 viewMatrix;
-    camera_getViewMatrix(camera, viewMatrix);
-    mat4 projectionMatrix;
-    camera_getProjectionMatrix(camera, projectionMatrix);
+    vec4* positionAndSizeBuffer = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, particleCount * BUFFER_ELEMENT_SIZE, access);
 
     for (int i = 0; i < particleCount; ++i)
     {
-        const Particle* p = &particles[i];
+        const Transform* t = &particles[i].transform;
 
-        mat4 worldMatrix;
-        transform_getWorldMatrix(&p->transform, worldMatrix);
+        vec4 positionAndSize = GLM_VEC4_ONE_INIT;
+        positionAndSize[0] = t->position[0];
+        positionAndSize[1] = t->position[1];
+        positionAndSize[2] = t->position[2];
 
-        mat4 wvpMatrix;
-        glm_mat4_mulN((mat4* []){&projectionMatrix, &viewMatrix, &worldMatrix}, 3, wvpMatrix);
-
-        glm_mat4_copy(wvpMatrix, *wvpBuffer);
-        ++wvpBuffer;
+        glm_vec4_copy(positionAndSize, *positionAndSizeBuffer);
+        ++positionAndSizeBuffer;
     }
 
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
 }
 
-void particle_renderer_render(ParticleRenderer* particleRenderer, int particleCount)
+void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* camera, int particleCount)
 {
     glEnable(GL_BLEND);
-    glEnable(GL_CULL_FACE);
-    glFrontFace(GL_CW);
-
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CCW);
 
     glUseProgram(particleRenderer->shader);
     glBindVertexArray(particleRenderer->VAO);
 
+    mat4 viewMatrix;
+    mat4 projectionMatrix;
+    camera_getViewMatrix(camera, viewMatrix);
+    camera_getProjectionMatrix(camera, projectionMatrix);
+
+    mat4 viewProjectionMatrix;
+    glm_mat4_mulN((mat4* []){&projectionMatrix, &viewMatrix}, 2, viewProjectionMatrix);
+
+    glUniformMatrix4fv(0, 1, 0, viewProjectionMatrix[0]);
+    glUniform3f(1, viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+    glUniform3f(2, viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, particleRenderer->sprite);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->wvpBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->positionAndSizeBuffer);
 
     glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particleCount);
 }
