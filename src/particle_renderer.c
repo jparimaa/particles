@@ -18,10 +18,10 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
 {
     // clang-format off
     float vertices[] = {
-        0.5f, -0.5f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f, // bottom left
-        0.5f, 0.5f, 0.0f, // top right
-		-0.5f, 0.5f, 0.0f // top left
+         0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // bottom right
+        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, // bottom left
+         0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // top right
+		-0.5f,  0.5f, 0.0f,   0.0f, 1.0f // top left
     };
     // clang-format on
 
@@ -33,15 +33,19 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     glBindBuffer(GL_ARRAY_BUFFER, particleRenderer->VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
+    GLsizei stride = 5 * sizeof(float);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, stride, NULL);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, stride, (void*)(3 * sizeof(float)));
+
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
     // Create shader
     const char* files[] = {CREATE_PATH(SHADER_PATH, "simple.vert"), CREATE_PATH(SHADER_PATH, "simple.frag")};
     particleRenderer->shader = shader_createProgram(2, files);
 
     // Load image
-    const char* imagePath = CREATE_PATH(ASSET_PATH, "green_square.png");
+    const char* imagePath = CREATE_PATH(ASSET_PATH, "smoke_particle.png");
     int width = 0;
     int height = 0;
     int channels = 0;
@@ -81,7 +85,7 @@ void particle_renderer_deinit(ParticleRenderer* particleRenderer)
 void particle_renderer_update(ParticleRenderer* particleRenderer, const Camera* camera, const Particle* particles, int particleCount)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->wvpBuffer);
-    GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
+    GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
     mat4* wvpBuffer = (mat4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, particleCount * MATRIX_SIZE, access);
 
     mat4 viewMatrix;
@@ -104,10 +108,17 @@ void particle_renderer_update(ParticleRenderer* particleRenderer, const Camera* 
     }
 
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
 }
 
 void particle_renderer_render(ParticleRenderer* particleRenderer, int particleCount)
 {
+    glEnable(GL_BLEND);
+    glEnable(GL_CULL_FACE);
+    glFrontFace(GL_CW);
+
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
     glUseProgram(particleRenderer->shader);
     glBindVertexArray(particleRenderer->VAO);
 

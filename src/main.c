@@ -59,9 +59,6 @@ int main()
         return 1;
     }
 
-    glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
-
-    // Setup utilities
     Camera camera;
     camera_init(&camera);
     camera.transform.position[0] = 0.0f;
@@ -88,6 +85,7 @@ int main()
         cameraController_update(&cameraController, timeDelta);
         particle_manager_update(&particleManager, timeDelta, &camera);
 
+        glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         particle_manager_render(&particleManager);
