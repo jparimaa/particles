@@ -11,14 +11,7 @@ void particle_manager_init(ParticleManager* particleManager, int maxParticleCoun
     particleManager->particleCount = 10;
     particleManager->particles = malloc(sizeof(Particle) * maxParticleCount);
 
-    for (int i = 0; i < particleManager->particleCount; ++i)
-    {
-        particle_init(&particleManager->particles[i]);
-        particleManager->particles[i].direction[0] = randomZeroToOne() - 0.5f;
-        particleManager->particles[i].direction[1] = randomZeroToOne() - 0.5f;
-        particleManager->particles[i].direction[2] = randomZeroToOne() - 0.5f;
-        particleManager->particles[i].lifeTime = randomZeroToOne() * 20.0f;
-    }
+    particle_manager_reset(particleManager);
 
     particle_renderer_init(&particleManager->particleRenderer, maxParticleCount);
 }
@@ -45,4 +38,16 @@ void particle_manager_update(ParticleManager* particleManager, float timeDelta)
 void particle_manager_render(ParticleManager* particleManager, const Camera* camera)
 {
     particle_renderer_render(&particleManager->particleRenderer, camera, particleManager->particleCount);
+}
+
+void particle_manager_reset(ParticleManager* particleManager)
+{
+    for (int i = 0; i < particleManager->particleCount; ++i)
+    {
+        particle_init(&particleManager->particles[i]);
+        particleManager->particles[i].direction[0] = randomZeroToOne() - 0.5f;
+        particleManager->particles[i].direction[1] = randomZeroToOne() - 0.5f;
+        particleManager->particles[i].direction[2] = randomZeroToOne() - 0.5f;
+        particleManager->particles[i].lifeTime = randomZeroToOne() * 20.0f;
+    }
 }

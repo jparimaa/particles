@@ -81,6 +81,9 @@ int main()
         float timeDelta = currentTime - previousTime;
         previousTime = currentTime;
 
+        input_clear(&input);
+        glfwPollEvents();
+
         input_update(&input);
         cameraController_update(&cameraController, timeDelta);
         particle_manager_update(&particleManager, timeDelta);
@@ -91,11 +94,14 @@ int main()
         particle_manager_render(&particleManager, &camera);
 
         glfwSwapBuffers(window);
-        glfwPollEvents();
 
         if (input.keyReleased[GLFW_KEY_ESCAPE])
         {
             glfwSetWindowShouldClose(window, true);
+        }
+        if (input.keyReleased[GLFW_KEY_F])
+        {
+            particle_manager_reset(&particleManager);
         }
     }
 

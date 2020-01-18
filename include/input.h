@@ -19,6 +19,7 @@ struct Input
 typedef struct Input Input;
 
 void input_init(Input* input, GLFWwindow* window);
+void input_clear(Input* input);
 void input_update(Input* input);
 
 #endif

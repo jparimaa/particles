@@ -20,5 +20,6 @@ void particle_manager_init(ParticleManager* particleManager, int maxParticleCoun
 void particle_manager_deinit(ParticleManager* particleManager);
 void particle_manager_update(ParticleManager* particleManager, float timeDelta);
 void particle_manager_render(ParticleManager* particleManager, const Camera* camera);
+void particle_manager_reset(ParticleManager* particleManager);
 
 #endif

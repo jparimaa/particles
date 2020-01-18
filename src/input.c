@@ -52,6 +52,15 @@ void input_init(Input* input, GLFWwindow* window)
     }
 }
 
+void input_clear(Input* input)
+{
+    for (int i = 0; i < GLFW_KEY_LAST; ++i)
+    {
+        input->keyPressed[i] = false;
+        input->keyReleased[i] = false;
+    }
+}
+
 void input_update(Input* input)
 {
     assert(input->window);
