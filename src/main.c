@@ -2,7 +2,7 @@
 #include "helpers.h"
 #include "camera.h"
 #include "camera_controller.h"
-#include "particle_manager.h"
+#include "particle_emitter.h"
 #include "input.h"
 
 #include <cglm/cglm.h>
@@ -70,8 +70,8 @@ int main()
     CameraController cameraController;
     cameraController_init(&cameraController, &camera, &input);
 
-    ParticleManager particleManager;
-    particle_manager_init(&particleManager, 100);
+    ParticleEmitter particleEmitter;
+    particle_emitter_init(&particleEmitter, 100);
 
     float previousTime = 0.0;
 
@@ -86,12 +86,12 @@ int main()
 
         input_update(&input);
         cameraController_update(&cameraController, timeDelta);
-        particle_manager_update(&particleManager, timeDelta);
+        particle_emitter_update(&particleEmitter, timeDelta);
 
         glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        particle_manager_render(&particleManager, &camera);
+        particle_emitter_render(&particleEmitter, &camera);
 
         glfwSwapBuffers(window);
 
@@ -101,11 +101,11 @@ int main()
         }
         if (input.keyReleased[GLFW_KEY_F])
         {
-            particle_manager_reset(&particleManager);
+            particle_emitter_reset(&particleEmitter);
         }
     }
 
-    particle_manager_deinit(&particleManager);
+    particle_emitter_deinit(&particleEmitter);
 
     glfwDestroyWindow(window);
     glfwTerminate();
