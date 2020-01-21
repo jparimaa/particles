@@ -82,15 +82,16 @@ void particle_renderer_deinit(ParticleRenderer* particleRenderer)
     shader_deleteProgram(particleRenderer->shader);
 }
 
-void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int particleCount)
+void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int count, int* indices)
 {
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->positionAndSizeBuffer);
     GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
-    vec4* positionAndSizeBuffer = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, particleCount * BUFFER_ELEMENT_SIZE, access);
+    vec4* positionAndSizeBuffer = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, count * BUFFER_ELEMENT_SIZE, access);
 
-    for (int i = 0; i < particleCount; ++i)
+    for (int i = 0; i < count; ++i)
     {
-        const Transform* t = &particles[i].transform;
+        int index = indices[i];
+        const Transform* t = &particles[index].transform;
 
         vec4 positionAndSize = GLM_VEC4_ONE_INIT;
         positionAndSize[0] = t->position[0];
@@ -105,7 +106,7 @@ void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
 }
 
-void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* camera, int particleCount)
+void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* camera, int count)
 {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -132,5 +133,5 @@ void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* 
 
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->positionAndSizeBuffer);
 
-    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, particleCount);
+    glDrawArraysInstanced(GL_TRIANGLE_STRIP, 0, 4, count);
 }

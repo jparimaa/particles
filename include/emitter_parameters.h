@@ -6,15 +6,17 @@
 struct EmitterParameters
 {
     vec3 direction;
-    float directionVariationAngle;
+    float directionVariationAngleInRadins;
     float particleLifeTime;
     float startSpeed;
     float startSize;
-    float startColor;
     float emissionRate;
+    vec3 startColor;
     float gravityModifier;
     int maxParticleCount;
 };
 typedef struct EmitterParameters EmitterParameters;
+
+void emitter_parameters_init(EmitterParameters* emitterParameters);
 
 #endif

@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "camera_controller.h"
 #include "particle_emitter.h"
+#include "emitter_parameters.h"
 #include "input.h"
 
 #include <cglm/cglm.h>
@@ -70,8 +71,10 @@ int main()
     CameraController cameraController;
     cameraController_init(&cameraController, &camera, &input);
 
+    EmitterParameters emitterParameters;
+    emitter_parameters_init(&emitterParameters);
     ParticleEmitter particleEmitter;
-    particle_emitter_init(&particleEmitter, 100);
+    particle_emitter_init(&particleEmitter, &emitterParameters);
 
     float previousTime = 0.0;
 
