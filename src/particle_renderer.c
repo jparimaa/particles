@@ -82,16 +82,20 @@ void particle_renderer_deinit(ParticleRenderer* particleRenderer)
     shader_deleteProgram(particleRenderer->shader);
 }
 
-void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int count, int* indices)
+void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int count)
 {
+    if (count <= 0)
+    {
+        return;
+    }
+
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->positionAndSizeBuffer);
     GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
     vec4* positionAndSizeBuffer = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, count * BUFFER_ELEMENT_SIZE, access);
 
     for (int i = 0; i < count; ++i)
     {
-        int index = indices[i];
-        const Transform* t = &particles[index].transform;
+        const Transform* t = &particles[i].transform;
 
         vec4 positionAndSize = GLM_VEC4_ONE_INIT;
         positionAndSize[0] = t->position[0];

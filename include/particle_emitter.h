@@ -12,10 +12,7 @@ struct ParticleEmitter
 {
     EmitterParameters parameters;
     Particle* particles;
-    int freeIndicesCount;
-    int* freeIndices;
-    int usedIndicesCount;
-    int* usedIndices;
+    int particleCount;
     float timeSinceLastEmit;
     ParticleRenderer particleRenderer;
 };
@@ -27,5 +24,6 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta);
 void particle_emitter_render(ParticleEmitter* particleEmitter, const Camera* camera);
 void particle_emitter_reset(ParticleEmitter* particleEmitter);
 void particle_emitter_emit(ParticleEmitter* particleEmitter);
+void particle_emitter_destroy(ParticleEmitter* particleEmitter, int index);
 
 #endif
