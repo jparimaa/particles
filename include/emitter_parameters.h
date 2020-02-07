@@ -6,7 +6,7 @@
 struct EmitterParameters
 {
     vec3 direction;
-    float directionVariationAngleInRadins;
+    vec3 directionVariance;
     float particleLifeTime;
     float startSpeed;
     float startSize;

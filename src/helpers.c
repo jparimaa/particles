@@ -18,6 +18,14 @@ float randomZeroToOne()
     return (float)rand() / (float)RAND_MAX;
 }
 
+float randomBetweenFloats(float a, float b)
+{
+    float randomZeroOne = randomZeroToOne();
+    float diff = b - a;
+    float r = randomZeroOne * diff;
+    return a + r;
+}
+
 void APIENTRY glDebugCallback(GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam)
 {
     UNUSED(length);
