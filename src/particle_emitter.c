@@ -10,6 +10,7 @@ void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* 
     int maxParticleCount = emitterParameters->maxParticleCount;
     particleEmitter->parameters = *emitterParameters;
     particleEmitter->particles = malloc(sizeof(Particle) * maxParticleCount);
+    particleEmitter->particleData = malloc(sizeof(vec4) * maxParticleCount);
     particleEmitter->timeSinceLastEmit = 0.0f;
 
     particle_emitter_reset(particleEmitter);
@@ -21,6 +22,7 @@ void particle_emitter_deinit(ParticleEmitter* particleEmitter)
 {
     particle_renderer_deinit(&particleEmitter->particleRenderer);
     free(particleEmitter->particles);
+    free(particleEmitter->particleData);
 }
 
 void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
@@ -54,9 +56,11 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
         vec3 movement = GLM_VEC3_ZERO_INIT;
         glm_vec3_scale(p->direction, timeDelta, movement);
         glm_vec3_add(p->transform.position, movement, p->transform.position);
+        glm_vec3_copy(p->transform.position, particleEmitter->particleData[i]);
+        particleEmitter->particleData[i][3] = 1.0f;
     }
 
-    particle_renderer_update(&particleEmitter->particleRenderer, particleEmitter->particles, particleEmitter->particleCount);
+    particle_renderer_update(&particleEmitter->particleRenderer, particleEmitter->particleData, particleEmitter->particleCount);
 }
 
 void particle_emitter_render(ParticleEmitter* particleEmitter, const Camera* camera)

@@ -82,7 +82,7 @@ void particle_renderer_deinit(ParticleRenderer* particleRenderer)
     shader_deleteProgram(particleRenderer->shader);
 }
 
-void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int count)
+void particle_renderer_update(ParticleRenderer* particleRenderer, const vec4* particleData, int count)
 {
     if (count <= 0)
     {
@@ -93,18 +93,7 @@ void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle
     GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_RANGE_BIT;
     vec4* positionAndSizeBuffer = (vec4*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, count * BUFFER_ELEMENT_SIZE, access);
 
-    for (int i = 0; i < count; ++i)
-    {
-        const Transform* t = &particles[i].transform;
-
-        vec4 positionAndSize = GLM_VEC4_ONE_INIT;
-        positionAndSize[0] = t->position[0];
-        positionAndSize[1] = t->position[1];
-        positionAndSize[2] = t->position[2];
-
-        glm_vec4_copy(positionAndSize, *positionAndSizeBuffer);
-        ++positionAndSizeBuffer;
-    }
+    memcpy(positionAndSizeBuffer, particleData, count * sizeof(vec4));
 
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
