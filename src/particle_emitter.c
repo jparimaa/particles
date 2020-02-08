@@ -39,7 +39,10 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 
     for (int i = 0; i < spawnCount; ++i)
     {
-        particle_emitter_emit(particleEmitter);
+        if (!particle_emitter_emit(particleEmitter))
+        {
+            break;
+        }
     }
 
     vec3 gravity;
@@ -80,11 +83,11 @@ void particle_emitter_reset(ParticleEmitter* particleEmitter)
     particleEmitter->timeSinceLastEmit = 0.0f;
 }
 
-void particle_emitter_emit(ParticleEmitter* particleEmitter)
+bool particle_emitter_emit(ParticleEmitter* particleEmitter)
 {
     if (particleEmitter->particleCount == particleEmitter->parameters.maxParticleCount)
     {
-        return;
+        return false;
     }
 
     Particle* p = &particleEmitter->particles[particleEmitter->particleCount];
@@ -99,6 +102,7 @@ void particle_emitter_emit(ParticleEmitter* particleEmitter)
     glm_vec3_normalize(pf->direction);
     glm_vec3_scale(pf->direction, ep->startSpeed, pf->direction);
     pf->lifeTime = ep->particleLifeTime;
+    return true;
 }
 
 void particle_emitter_destroy(ParticleEmitter* particleEmitter, int index)

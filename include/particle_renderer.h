@@ -12,7 +12,7 @@ struct ParticleRenderer
     GLuint VBO;
     GLuint sprite;
     GLuint shader;
-    GLuint positionAndSizeBuffer;
+    GLuint particleBuffer;
 };
 typedef struct ParticleRenderer ParticleRenderer;
 
