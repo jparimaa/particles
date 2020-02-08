@@ -7,11 +7,14 @@ struct EmitterParameters
 {
     vec3 direction;
     vec3 directionVariance;
-    float particleLifeTime;
-    float startSpeed;
-    float startSize;
+    vec2 particleLifeTime; // Min-max
+    vec2 speed; // Min-max
+    vec2 acceleration; // Min-max
+    vec2 startSize; // Min-max
+    vec2 scalingRate; // Min-max
     float emissionRate;
     vec3 startColor;
+    vec3 endColor;
     float gravityModifier;
     int maxParticleCount;
 };

@@ -18,6 +18,8 @@ struct ParticleFlow
 {
     vec3 direction;
     float lifeTime;
+    float acceleration;
+    float scalingRate;
 };
 typedef struct ParticleFlow ParticleFlow;
 

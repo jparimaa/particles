@@ -45,7 +45,7 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     particleRenderer->shader = shader_createProgram(2, files);
 
     // Load image
-    const char* imagePath = CREATE_PATH(ASSET_PATH, "smoke_particle.png");
+    const char* imagePath = CREATE_PATH(ASSET_PATH, "sparkle.png");
     int width = 0;
     int height = 0;
     int channels = 0;

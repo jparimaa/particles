@@ -60,13 +60,22 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
             particle_emitter_destroy(particleEmitter, i);
         }
 
+        Particle* p = &particleEmitter->particles[i];
+
+        // Gravity
         glm_vec3_add(pf->direction, gravity, pf->direction);
 
+        // Acceleration
+        glm_vec3_scale(pf->direction, pf->acceleration, pf->direction);
+
+        // Position
         vec3 movement = GLM_VEC3_ZERO_INIT;
         glm_vec3_scale(pf->direction, timeDelta, movement);
-
-        Particle* p = &particleEmitter->particles[i];
         glm_vec3_add(p->position, movement, p->position);
+
+        // Size
+        float scaleChange = ((pf->scalingRate * p->scale) - p->scale) * timeDelta;
+        p->scale += scaleChange;
     }
 
     particle_renderer_update(&particleEmitter->particleRenderer, particleEmitter->particles, particleEmitter->particleCount);
@@ -96,12 +105,23 @@ bool particle_emitter_emit(ParticleEmitter* particleEmitter)
     ++particleEmitter->particleCount;
 
     EmitterParameters* ep = &particleEmitter->parameters;
+
+    // Particle
+    p->scale = randomBetweenFloats(ep->startSize[0], ep->startSize[1]);
+    glm_vec3_copy(ep->startColor, p->color);
+
+    // Particle flow
     pf->direction[0] = ep->direction[0] + randomBetweenFloats(-ep->directionVariance[0], ep->directionVariance[0]);
     pf->direction[1] = ep->direction[1] + randomBetweenFloats(-ep->directionVariance[1], ep->directionVariance[1]);
     pf->direction[2] = ep->direction[2] + randomBetweenFloats(-ep->directionVariance[2], ep->directionVariance[2]);
     glm_vec3_normalize(pf->direction);
-    glm_vec3_scale(pf->direction, ep->startSpeed, pf->direction);
-    pf->lifeTime = ep->particleLifeTime;
+    float speed = randomBetweenFloats(ep->speed[0], ep->speed[1]);
+    glm_vec3_scale(pf->direction, speed, pf->direction);
+
+    pf->acceleration = randomBetweenFloats(ep->acceleration[0], ep->acceleration[1]);
+    pf->lifeTime = randomBetweenFloats(ep->particleLifeTime[0], ep->particleLifeTime[1]);
+    pf->scalingRate = randomBetweenFloats(ep->scalingRate[0], ep->scalingRate[1]);
+
     return true;
 }
 
