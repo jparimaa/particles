@@ -12,7 +12,7 @@ struct ParticleEmitter
 {
     EmitterParameters parameters;
     Particle* particles;
-    vec4* particleData;
+    ParticleFlow* particleFlows;
     int particleCount;
     float timeSinceLastEmit;
     ParticleRenderer particleRenderer;

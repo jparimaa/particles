@@ -6,9 +6,17 @@ layout (location = 0) uniform mat4 viewProjectionMatrix;
 layout (location = 1) uniform vec3 cameraUp;
 layout (location = 2) uniform vec3 cameraRight;
 
+struct Particle
+{
+    vec3 position;
+    float scale;
+    vec3 color;
+    float rotation;
+};
+
 layout (std430, binding = 0) readonly buffer PositionSizeBuffer
 {
-    vec4 positionAndSize[];
+    Particle particles[];
 };
 
 out vec2 texCoord;
@@ -16,9 +24,9 @@ out vec2 texCoord;
 void main()
 {
     vec3 vertexPosition = 
-        positionAndSize[gl_InstanceID].xyz +
-		cameraRight * position.x * positionAndSize[gl_InstanceID].w +
-		cameraUp * position.y * positionAndSize[gl_InstanceID].w;
+        particles[gl_InstanceID].position +
+		cameraRight * position.x * particles[gl_InstanceID].scale +
+		cameraUp * position.y * particles[gl_InstanceID].scale;
 
 	gl_Position = viewProjectionMatrix * vec4(vertexPosition, 1.0);
     texCoord = uv;

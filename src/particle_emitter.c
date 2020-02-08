@@ -10,7 +10,7 @@ void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* 
     int maxParticleCount = emitterParameters->maxParticleCount;
     particleEmitter->parameters = *emitterParameters;
     particleEmitter->particles = malloc(sizeof(Particle) * maxParticleCount);
-    particleEmitter->particleData = malloc(sizeof(vec4) * maxParticleCount);
+    particleEmitter->particleFlows = malloc(sizeof(ParticleFlow) * maxParticleCount);
     particleEmitter->timeSinceLastEmit = 0.0f;
 
     particle_emitter_reset(particleEmitter);
@@ -22,7 +22,7 @@ void particle_emitter_deinit(ParticleEmitter* particleEmitter)
 {
     particle_renderer_deinit(&particleEmitter->particleRenderer);
     free(particleEmitter->particles);
-    free(particleEmitter->particleData);
+    free(particleEmitter->particleFlows);
 }
 
 void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
@@ -49,26 +49,24 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 
     for (int i = 0; i < particleEmitter->particleCount; ++i)
     {
-        Particle* p = &particleEmitter->particles[i];
-        p->lifeTime -= timeDelta;
+        ParticleFlow* pf = &particleEmitter->particleFlows[i];
+        pf->lifeTime -= timeDelta;
 
-        if (p->lifeTime < 0.0f)
+        if (pf->lifeTime < 0.0f)
         {
             particle_emitter_destroy(particleEmitter, i);
-            continue;
         }
 
-        glm_vec3_add(p->direction, gravity, p->direction);
+        glm_vec3_add(pf->direction, gravity, pf->direction);
 
         vec3 movement = GLM_VEC3_ZERO_INIT;
-        glm_vec3_scale(p->direction, timeDelta, movement);
-        glm_vec3_add(p->transform.position, movement, p->transform.position);
+        glm_vec3_scale(pf->direction, timeDelta, movement);
 
-        glm_vec3_copy(p->transform.position, particleEmitter->particleData[i]);
-        particleEmitter->particleData[i][3] = 1.0f;
+        Particle* p = &particleEmitter->particles[i];
+        glm_vec3_add(p->position, movement, p->position);
     }
 
-    particle_renderer_update(&particleEmitter->particleRenderer, particleEmitter->particleData, particleEmitter->particleCount);
+    particle_renderer_update(&particleEmitter->particleRenderer, particleEmitter->particles, particleEmitter->particleCount);
 }
 
 void particle_emitter_render(ParticleEmitter* particleEmitter, const Camera* camera)
@@ -90,21 +88,23 @@ void particle_emitter_emit(ParticleEmitter* particleEmitter)
     }
 
     Particle* p = &particleEmitter->particles[particleEmitter->particleCount];
+    ParticleFlow* pf = &particleEmitter->particleFlows[particleEmitter->particleCount];
     particle_init(p);
     ++particleEmitter->particleCount;
 
     EmitterParameters* ep = &particleEmitter->parameters;
-    p->direction[0] = ep->direction[0] + randomBetweenFloats(-ep->directionVariance[0], ep->directionVariance[0]);
-    p->direction[1] = ep->direction[1] + randomBetweenFloats(-ep->directionVariance[1], ep->directionVariance[1]);
-    p->direction[2] = ep->direction[2] + randomBetweenFloats(-ep->directionVariance[2], ep->directionVariance[2]);
-    glm_vec3_normalize(p->direction);
-    glm_vec3_scale(p->direction, ep->startSpeed, p->direction);
-    p->lifeTime = ep->particleLifeTime;
+    pf->direction[0] = ep->direction[0] + randomBetweenFloats(-ep->directionVariance[0], ep->directionVariance[0]);
+    pf->direction[1] = ep->direction[1] + randomBetweenFloats(-ep->directionVariance[1], ep->directionVariance[1]);
+    pf->direction[2] = ep->direction[2] + randomBetweenFloats(-ep->directionVariance[2], ep->directionVariance[2]);
+    glm_vec3_normalize(pf->direction);
+    glm_vec3_scale(pf->direction, ep->startSpeed, pf->direction);
+    pf->lifeTime = ep->particleLifeTime;
 }
 
 void particle_emitter_destroy(ParticleEmitter* particleEmitter, int index)
 {
     int lastIndex = particleEmitter->particleCount - 1;
     particleEmitter->particles[index] = particleEmitter->particles[lastIndex];
+    particleEmitter->particleFlows[index] = particleEmitter->particleFlows[lastIndex];
     --particleEmitter->particleCount;
 }

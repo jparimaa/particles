@@ -18,7 +18,7 @@ typedef struct ParticleRenderer ParticleRenderer;
 
 void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount);
 void particle_renderer_deinit(ParticleRenderer* particleRenderer);
-void particle_renderer_update(ParticleRenderer* particleRenderer, const vec4* particleData, int count);
+void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle* particles, int count);
 void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* camera, int count);
 
 #endif

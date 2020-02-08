@@ -1,18 +1,26 @@
 #ifndef particle_h
 #define particle_h
 
-#include "transform.h"
-
 #include <cglm/cglm.h>
 
 struct Particle
 {
-    Transform transform;
-    vec3 direction;
-    float lifeTime;
+    vec3 position;
+    float scale;
+    vec3 color;
+    float rotation;
 };
 typedef struct Particle Particle;
 
 void particle_init(Particle* particle);
+
+struct ParticleFlow
+{
+    vec3 direction;
+    float lifeTime;
+};
+typedef struct ParticleFlow ParticleFlow;
+
+void particle_flow_init(ParticleFlow* particleFlow);
 
 #endif
