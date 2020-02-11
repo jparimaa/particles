@@ -10,7 +10,7 @@ struct Particle
 {
     vec3 position;
     float scale;
-    vec3 color;
+    vec4 color;
     float rotation;
 };
 
@@ -20,6 +20,7 @@ layout (std430, binding = 0) readonly buffer PositionSizeBuffer
 };
 
 out vec2 texCoord;
+out vec4 particleColor;
 
 void main()
 {
@@ -30,4 +31,5 @@ void main()
 
 	gl_Position = viewProjectionMatrix * vec4(vertexPosition, 1.0);
     texCoord = uv;
+    particleColor = particles[gl_InstanceID].color;
 }

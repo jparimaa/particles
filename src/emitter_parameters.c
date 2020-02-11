@@ -18,7 +18,9 @@ void emitter_parameters_init(EmitterParameters* emitterParameters)
     emitterParameters->scalingRate[0] = 1.0f;
     emitterParameters->scalingRate[1] = 1.0f;
     emitterParameters->emissionRate = 5.0f;
-    glm_vec3_one(emitterParameters->startColor);
+    glm_vec4_one(emitterParameters->startColor);
+    glm_vec4_zero(emitterParameters->endColor);
+    emitterParameters->endColor[0] = 0.4f;
     emitterParameters->gravityModifier = 0.2f;
     emitterParameters->maxParticleCount = 8;
 }

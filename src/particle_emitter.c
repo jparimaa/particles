@@ -73,6 +73,11 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
         glm_vec3_scale(pf->direction, timeDelta, movement);
         glm_vec3_add(p->position, movement, p->position);
 
+        // Color
+        vec4 colorChange;
+        glm_vec4_scale(pf->colorChangeRate, timeDelta, colorChange);
+        glm_vec4_add(p->color, colorChange, p->color);
+
         // Size
         float scaleChange = ((pf->scalingRate * p->scale) - p->scale) * timeDelta;
         p->scale += scaleChange;
@@ -108,7 +113,7 @@ bool particle_emitter_emit(ParticleEmitter* particleEmitter)
 
     // Particle
     p->scale = randomBetweenFloats(ep->startSize[0], ep->startSize[1]);
-    glm_vec3_copy(ep->startColor, p->color);
+    glm_vec4_copy(ep->startColor, p->color);
 
     // Particle flow
     pf->direction[0] = ep->direction[0] + randomBetweenFloats(-ep->directionVariance[0], ep->directionVariance[0]);
@@ -121,6 +126,9 @@ bool particle_emitter_emit(ParticleEmitter* particleEmitter)
     pf->acceleration = randomBetweenFloats(ep->acceleration[0], ep->acceleration[1]);
     pf->lifeTime = randomBetweenFloats(ep->particleLifeTime[0], ep->particleLifeTime[1]);
     pf->scalingRate = randomBetweenFloats(ep->scalingRate[0], ep->scalingRate[1]);
+
+    glm_vec4_sub(ep->endColor, ep->startColor, pf->colorChangeRate);
+    glm_vec4_divs(pf->colorChangeRate, pf->lifeTime, pf->colorChangeRate);
 
     return true;
 }

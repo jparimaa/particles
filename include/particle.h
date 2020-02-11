@@ -7,7 +7,7 @@ struct Particle
 {
     vec3 position;
     float scale;
-    vec3 color;
+    vec4 color;
     float rotation;
 };
 typedef struct Particle Particle;
@@ -20,6 +20,7 @@ struct ParticleFlow
     float lifeTime;
     float acceleration;
     float scalingRate;
+    vec4 colorChangeRate;
 };
 typedef struct ParticleFlow ParticleFlow;
 
