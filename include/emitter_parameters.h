@@ -13,8 +13,10 @@ struct EmitterParameters
     vec2 startSize; // Min-max
     vec2 scalingRate; // Min-max
     float emissionRate;
-    vec4 startColor;
-    vec4 endColor;
+    vec4 startColorMin;
+    vec4 startColorMax;
+    vec4 endColorMin;
+    vec4 endColorMax;
     float gravityModifier;
     int maxParticleCount;
 };

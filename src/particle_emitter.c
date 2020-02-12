@@ -113,7 +113,10 @@ bool particle_emitter_emit(ParticleEmitter* particleEmitter)
 
     // Particle
     p->scale = randomBetweenFloats(ep->startSize[0], ep->startSize[1]);
-    glm_vec4_copy(ep->startColor, p->color);
+    p->color[0] = randomBetweenFloats(ep->startColorMin[0], ep->startColorMax[0]);
+    p->color[1] = randomBetweenFloats(ep->startColorMin[1], ep->startColorMax[1]);
+    p->color[2] = randomBetweenFloats(ep->startColorMin[2], ep->startColorMax[2]);
+    p->color[3] = randomBetweenFloats(ep->startColorMin[3], ep->startColorMax[3]);
 
     // Particle flow
     pf->direction[0] = ep->direction[0] + randomBetweenFloats(-ep->directionVariance[0], ep->directionVariance[0]);
@@ -127,7 +130,13 @@ bool particle_emitter_emit(ParticleEmitter* particleEmitter)
     pf->lifeTime = randomBetweenFloats(ep->particleLifeTime[0], ep->particleLifeTime[1]);
     pf->scalingRate = randomBetweenFloats(ep->scalingRate[0], ep->scalingRate[1]);
 
-    glm_vec4_sub(ep->endColor, ep->startColor, pf->colorChangeRate);
+    vec4 endColor;
+    endColor[0] = randomBetweenFloats(ep->endColorMin[0], ep->endColorMax[0]);
+    endColor[1] = randomBetweenFloats(ep->endColorMin[1], ep->endColorMax[1]);
+    endColor[2] = randomBetweenFloats(ep->endColorMin[2], ep->endColorMax[2]);
+    endColor[3] = randomBetweenFloats(ep->endColorMin[3], ep->endColorMax[3]);
+
+    glm_vec4_sub(endColor, p->color, pf->colorChangeRate);
     glm_vec4_divs(pf->colorChangeRate, pf->lifeTime, pf->colorChangeRate);
 
     return true;
