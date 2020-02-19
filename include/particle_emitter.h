@@ -26,7 +26,7 @@ void particle_emitter_deinit(ParticleEmitter* particleEmitter);
 void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta);
 void particle_emitter_render(ParticleEmitter* particleEmitter, const Camera* camera);
 void particle_emitter_reset(ParticleEmitter* particleEmitter);
-bool particle_emitter_emit(ParticleEmitter* particleEmitter);
-void particle_emitter_destroy(ParticleEmitter* particleEmitter, int index);
+bool particle_emitter_emit_particle(ParticleEmitter* particleEmitter);
+void particle_emitter_destroy_particle(ParticleEmitter* particleEmitter, int index);
 
 #endif

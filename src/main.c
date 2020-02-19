@@ -2,7 +2,7 @@
 #include "helpers.h"
 #include "camera.h"
 #include "camera_controller.h"
-#include "particle_emitter.h"
+#include "particle_system.h"
 #include "emitter_parameters.h"
 #include "input.h"
 
@@ -73,8 +73,10 @@ int main()
 
     EmitterParameters emitterParameters;
     emitter_parameters_init(&emitterParameters);
-    ParticleEmitter particleEmitter;
-    particle_emitter_init(&particleEmitter, &emitterParameters);
+
+    ParticleSystem particleSystem;
+    particle_system_init(&particleSystem, 1);
+    particle_system_add_emitter(&particleSystem, &emitterParameters);
 
     float previousTime = 0.0;
 
@@ -89,12 +91,12 @@ int main()
 
         input_update(&input);
         cameraController_update(&cameraController, timeDelta);
-        particle_emitter_update(&particleEmitter, timeDelta);
+        particle_system_update(&particleSystem, timeDelta);
 
         glClearColor(0.0f, 0.0f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        particle_emitter_render(&particleEmitter, &camera);
+        particle_system_render(&particleSystem, &camera);
 
         glfwSwapBuffers(window);
 
@@ -104,11 +106,11 @@ int main()
         }
         if (input.keyReleased[GLFW_KEY_F])
         {
-            particle_emitter_reset(&particleEmitter);
+            particle_system_reset(&particleSystem);
         }
     }
 
-    particle_emitter_deinit(&particleEmitter);
+    particle_system_deinit(&particleSystem);
 
     glfwDestroyWindow(window);
     glfwTerminate();

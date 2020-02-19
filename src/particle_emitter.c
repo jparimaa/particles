@@ -39,7 +39,7 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 
     for (int i = 0; i < spawnCount; ++i)
     {
-        if (!particle_emitter_emit(particleEmitter))
+        if (!particle_emitter_emit_particle(particleEmitter))
         {
             break;
         }
@@ -57,7 +57,7 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 
         if (pf->lifeTime < 0.0f)
         {
-            particle_emitter_destroy(particleEmitter, i);
+            particle_emitter_destroy_particle(particleEmitter, i);
         }
 
         Particle* p = &particleEmitter->particles[i];
@@ -97,7 +97,7 @@ void particle_emitter_reset(ParticleEmitter* particleEmitter)
     particleEmitter->timeSinceLastEmit = 0.0f;
 }
 
-bool particle_emitter_emit(ParticleEmitter* particleEmitter)
+bool particle_emitter_emit_particle(ParticleEmitter* particleEmitter)
 {
     if (particleEmitter->particleCount == particleEmitter->parameters.maxParticleCount)
     {
@@ -142,7 +142,7 @@ bool particle_emitter_emit(ParticleEmitter* particleEmitter)
     return true;
 }
 
-void particle_emitter_destroy(ParticleEmitter* particleEmitter, int index)
+void particle_emitter_destroy_particle(ParticleEmitter* particleEmitter, int index)
 {
     int lastIndex = particleEmitter->particleCount - 1;
     particleEmitter->particles[index] = particleEmitter->particles[lastIndex];
