@@ -7,31 +7,20 @@
 
 void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* emitterParameters)
 {
-    int maxParticleCount = emitterParameters->maxParticleCount;
     particleEmitter->parameters = *emitterParameters;
-    particleEmitter->particles = malloc(sizeof(Particle) * maxParticleCount);
-    particleEmitter->particleFlows = malloc(sizeof(ParticleFlow) * maxParticleCount);
-    particleEmitter->timeSinceLastEmit = 0.0f;
-
     particle_emitter_reset(particleEmitter);
-
-    particle_renderer_init(&particleEmitter->particleRenderer, maxParticleCount);
 }
 
 void particle_emitter_deinit(ParticleEmitter* particleEmitter)
 {
-    particle_renderer_deinit(&particleEmitter->particleRenderer);
-    free(particleEmitter->particles);
-    free(particleEmitter->particleFlows);
 }
 
-void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
+void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta, Particle* particles, ParticleFlow* flows)
 {
     EmitterParameters* params = &particleEmitter->parameters;
 
     particleEmitter->timeSinceLastEmit += timeDelta;
     int spawnCount = (int)(particleEmitter->timeSinceLastEmit / (1.0f / params->emissionRate));
-    spawnCount = MIN(spawnCount, particleEmitter->parameters.maxParticleCount - particleEmitter->particleCount);
     if (spawnCount > 0)
     {
         particleEmitter->timeSinceLastEmit = 0.0f;
@@ -39,7 +28,7 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 
     for (int i = 0; i < spawnCount; ++i)
     {
-        if (!particle_emitter_emit_particle(particleEmitter))
+        if (!particle_emitter_emit_particle(particleEmitter, particles, flows))
         {
             break;
         }
@@ -50,17 +39,18 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
     glm_vec3_scale(gravity, params->gravityModifier, gravity);
     glm_vec3_scale(gravity, timeDelta, gravity);
 
-    for (int i = 0; i < particleEmitter->particleCount; ++i)
+    int lastIndex = particleEmitter->startIndex + particleEmitter->particleCount;
+    for (int i = particleEmitter->startIndex; i < lastIndex; ++i)
     {
-        ParticleFlow* pf = &particleEmitter->particleFlows[i];
+        ParticleFlow* pf = &flows[i];
         pf->lifeTime -= timeDelta;
 
         if (pf->lifeTime < 0.0f)
         {
-            particle_emitter_destroy_particle(particleEmitter, i);
+            particle_emitter_destroy_particle(particleEmitter, i, particles, flows);
         }
 
-        Particle* p = &particleEmitter->particles[i];
+        Particle* p = &particles[i];
 
         // Gravity
         glm_vec3_add(pf->direction, gravity, pf->direction);
@@ -82,13 +72,6 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
         float scaleChange = ((pf->scalingRate * p->scale) - p->scale) * timeDelta;
         p->scale += scaleChange;
     }
-
-    particle_renderer_update(&particleEmitter->particleRenderer, particleEmitter->particles, particleEmitter->particleCount);
-}
-
-void particle_emitter_render(ParticleEmitter* particleEmitter, const Camera* camera)
-{
-    particle_renderer_render(&particleEmitter->particleRenderer, camera, particleEmitter->particleCount);
 }
 
 void particle_emitter_reset(ParticleEmitter* particleEmitter)
@@ -97,15 +80,11 @@ void particle_emitter_reset(ParticleEmitter* particleEmitter)
     particleEmitter->timeSinceLastEmit = 0.0f;
 }
 
-bool particle_emitter_emit_particle(ParticleEmitter* particleEmitter)
+bool particle_emitter_emit_particle(ParticleEmitter* particleEmitter, Particle* particles, ParticleFlow* flows)
 {
-    if (particleEmitter->particleCount == particleEmitter->parameters.maxParticleCount)
-    {
-        return false;
-    }
-
-    Particle* p = &particleEmitter->particles[particleEmitter->particleCount];
-    ParticleFlow* pf = &particleEmitter->particleFlows[particleEmitter->particleCount];
+    int index = particleEmitter->startIndex + particleEmitter->particleCount;
+    Particle* p = &particles[index];
+    ParticleFlow* pf = &flows[index];
     particle_init(p);
     ++particleEmitter->particleCount;
 
@@ -142,10 +121,11 @@ bool particle_emitter_emit_particle(ParticleEmitter* particleEmitter)
     return true;
 }
 
-void particle_emitter_destroy_particle(ParticleEmitter* particleEmitter, int index)
+void particle_emitter_destroy_particle(ParticleEmitter* particleEmitter, int index, Particle* particles, ParticleFlow* flows)
 {
-    int lastIndex = particleEmitter->particleCount - 1;
-    particleEmitter->particles[index] = particleEmitter->particles[lastIndex];
-    particleEmitter->particleFlows[index] = particleEmitter->particleFlows[lastIndex];
+    int lastIndex = particleEmitter->startIndex + particleEmitter->particleCount - 1;
+    particles[index] = particles[lastIndex];
+    flows[index] = flows[lastIndex];
+    particles[lastIndex].scale = 0.0f;
     --particleEmitter->particleCount;
 }

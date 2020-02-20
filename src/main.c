@@ -75,8 +75,12 @@ int main()
     emitter_parameters_init(&emitterParameters);
 
     ParticleSystem particleSystem;
-    particle_system_init(&particleSystem, 1);
+    particle_system_init(&particleSystem, 4);
     particle_system_add_emitter(&particleSystem, &emitterParameters);
+    particle_system_add_emitter(&particleSystem, &emitterParameters);
+    particle_system_add_emitter(&particleSystem, &emitterParameters);
+    particle_system_add_emitter(&particleSystem, &emitterParameters);
+    particle_system_finalize(&particleSystem);
 
     float previousTime = 0.0;
 

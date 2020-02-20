@@ -38,6 +38,4 @@ void emitter_parameters_init(EmitterParameters* emitterParameters)
     emitterParameters->endColorMax[2] = 0.4f;
 
     emitterParameters->gravityModifier = 0.2f;
-
-    emitterParameters->maxParticleCount = 100;
 }

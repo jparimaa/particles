@@ -18,7 +18,6 @@ struct EmitterParameters
     vec4 endColorMin;
     vec4 endColorMax;
     float gravityModifier;
-    int maxParticleCount;
 };
 typedef struct EmitterParameters EmitterParameters;
 
