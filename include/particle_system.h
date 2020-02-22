@@ -2,8 +2,8 @@
 #define particle_system_h
 
 #include "particle_emitter.h"
+#include "particle_state.h"
 #include "emitter_parameters.h"
-#include "particle.h"
 #include "particle_renderer.h"
 #include "camera.h"
 
@@ -13,8 +13,7 @@ struct ParticleSystem
     ParticleEmitter* emitters;
     int emitterCount;
     int maxParticleCount;
-    Particle* particles;
-    ParticleFlow* particleFlows;
+    ParticleState* particleStates;
     ParticleRenderer particleRenderer;
 };
 typedef struct ParticleSystem ParticleSystem;

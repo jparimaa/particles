@@ -14,8 +14,7 @@ void particle_system_deinit(ParticleSystem* system)
         particle_emitter_deinit(&system->emitters[i]);
     }
     free(system->emitters);
-    free(system->particles);
-    free(system->particleFlows);
+    free(system->particleStates);
     particle_renderer_deinit(&system->particleRenderer);
 }
 
@@ -42,12 +41,11 @@ void particle_system_finalize(ParticleSystem* system)
         particleCount += (int)(maxCount + 1.0f);
     }
     system->maxParticleCount = particleCount;
-    system->particles = malloc(sizeof(Particle) * particleCount);
-    system->particleFlows = malloc(sizeof(ParticleFlow) * particleCount);
+    system->particleStates = malloc(particleCount * sizeof(ParticleState));
 
     for (int i = 0; i < particleCount; ++i)
     {
-        system->particles[i].scale = 0.0f;
+        particle_state_init(&system->particleStates[i]);
     }
 
     particle_renderer_init(&system->particleRenderer, particleCount);
@@ -58,10 +56,10 @@ void particle_system_update(ParticleSystem* system, float timeDelta)
     // Todo: multithread
     for (int i = 0; i < system->emitterCount; ++i)
     {
-        particle_emitter_update(&system->emitters[i], timeDelta, system->particles, system->particleFlows);
+        particle_emitter_update(&system->emitters[i], timeDelta, system->particleStates);
     }
 
-    particle_renderer_update(&system->particleRenderer, system->particles, system->maxParticleCount);
+    particle_renderer_update(&system->particleRenderer, system->particleStates);
 }
 
 void particle_system_render(ParticleSystem* system, const Camera* camera)
