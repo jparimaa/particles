@@ -7,7 +7,7 @@
 
 void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* emitterParameters)
 {
-    particleEmitter->parameters = *emitterParameters;
+    particleEmitter->parameters = emitterParameters;
     particle_emitter_reset(particleEmitter);
 }
 
@@ -17,7 +17,7 @@ void particle_emitter_deinit(ParticleEmitter* particleEmitter)
 
 void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta, ParticleState* states)
 {
-    EmitterParameters* params = &particleEmitter->parameters;
+    EmitterParameters* params = particleEmitter->parameters;
 
     particleEmitter->timeSinceLastEmit += timeDelta;
     int spawnCount = (int)(particleEmitter->timeSinceLastEmit / (1.0f / params->emissionRate));

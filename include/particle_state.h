@@ -6,8 +6,8 @@
 enum ParticleStatus
 {
     PARTICLE_STATUS_DEAD = 0,
-    PARTICLE_STATUS_ALIVE = 1,
-    PARTICLE_STATUS_RESET = 2
+    PARTICLE_STATUS_RESET = 1,
+    PARTICLE_STATUS_ALIVE = 2,
 };
 typedef enum ParticleStatus ParticleStatus;
 

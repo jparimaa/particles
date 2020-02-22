@@ -3,6 +3,7 @@
 void particle_system_init(ParticleSystem* system, int maxEmitterCount)
 {
     system->maxEmitterCount = maxEmitterCount;
+    system->emitterParameters = malloc(maxEmitterCount * sizeof(EmitterParameters));
     system->emitters = malloc(maxEmitterCount * sizeof(ParticleEmitter));
     system->emitterCount = 0;
 }
@@ -13,6 +14,7 @@ void particle_system_deinit(ParticleSystem* system)
     {
         particle_emitter_deinit(&system->emitters[i]);
     }
+    free(system->emitterParameters);
     free(system->emitters);
     free(system->particleStates);
     particle_renderer_deinit(&system->particleRenderer);
@@ -25,7 +27,8 @@ int particle_system_add_emitter(ParticleSystem* system, EmitterParameters* param
     {
         return -1;
     }
-    particle_emitter_init(&system->emitters[index], parameters);
+    system->emitterParameters[index] = *parameters;
+    particle_emitter_init(&system->emitters[index], &system->emitterParameters[index]);
     ++system->emitterCount;
     return index;
 }
@@ -36,7 +39,7 @@ void particle_system_finalize(ParticleSystem* system)
     for (int i = 0; i < system->emitterCount; ++i)
     {
         system->emitters[i].startIndex = particleCount;
-        EmitterParameters* ep = &system->emitters[i].parameters;
+        EmitterParameters* ep = &system->emitterParameters[i];
         float maxCount = ep->particleLifeTime[1] / (1.0f / ep->emissionRate);
         particleCount += (int)(maxCount + 1.0f);
     }
@@ -48,7 +51,7 @@ void particle_system_finalize(ParticleSystem* system)
         particle_state_init(&system->particleStates[i]);
     }
 
-    particle_renderer_init(&system->particleRenderer, particleCount);
+    particle_renderer_init(&system->particleRenderer, particleCount, system->emitterParameters, system->emitterCount);
 }
 
 void particle_system_update(ParticleSystem* system, float timeDelta)
@@ -59,7 +62,7 @@ void particle_system_update(ParticleSystem* system, float timeDelta)
         particle_emitter_update(&system->emitters[i], timeDelta, system->particleStates);
     }
 
-    particle_renderer_update(&system->particleRenderer, system->particleStates);
+    particle_renderer_update(&system->particleRenderer, system->particleStates, system->maxParticleCount, timeDelta);
 }
 
 void particle_system_render(ParticleSystem* system, const Camera* camera)

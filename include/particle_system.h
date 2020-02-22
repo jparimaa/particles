@@ -10,6 +10,7 @@
 struct ParticleSystem
 {
     int maxEmitterCount;
+    EmitterParameters* emitterParameters;
     ParticleEmitter* emitters;
     int emitterCount;
     int maxParticleCount;

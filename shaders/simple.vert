@@ -19,16 +19,22 @@ layout (std430, binding = 0) readonly buffer ParticleStateBuffer
 
 struct Particle
 {
+    vec4 color;
+    vec4 colorChangeRate;
     vec3 position;
     float scale;
-    vec4 color;
+    vec3 direction;
     float rotation;
+    float lifeTime;
+    float acceleration;
+    float scalingRate;    
 };
 
-layout (std430, binding = 1) readonly buffer ParticleBuffer
+layout (std430, binding = 1) buffer ParticleBuffer
 {
     Particle particles[];
 };
+
 
 out vec2 texCoord;
 out vec4 particleColor;

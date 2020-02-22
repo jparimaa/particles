@@ -12,9 +12,13 @@
 #pragma GCC diagnostic pop
 #endif
 
-static const int PARTICLE_STATE_SIZE = sizeof(ParticleState);
+#include <math.h>
 
-void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount)
+static const int PARTICLE_STATE_SIZE = sizeof(ParticleState);
+static const int PARTICLE_SIZE = 20 * sizeof(float);
+static const int EMITTER_PARAMETERS_SIZE = sizeof(EmitterParameters);
+
+void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount, EmitterParameters* params, int emitterCount)
 {
     // clang-format off
     float vertices[] = {
@@ -40,9 +44,12 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 
-    // Create shader
-    const char* files[] = {CREATE_PATH(SHADER_PATH, "simple.vert"), CREATE_PATH(SHADER_PATH, "simple.frag")};
-    particleRenderer->shader = shader_createProgram(2, files);
+    // Create shaders
+    const char* drawShaderFiles[] = {CREATE_PATH(SHADER_PATH, "simple.vert"), CREATE_PATH(SHADER_PATH, "simple.frag")};
+    particleRenderer->drawShader = shader_createProgram(2, drawShaderFiles);
+
+    const char* updateShaderFile[] = {CREATE_PATH(SHADER_PATH, "update.comp")};
+    particleRenderer->drawShader = shader_createProgram(1, updateShaderFile);
 
     // Load image
     const char* imagePath = CREATE_PATH(ASSET_PATH, "ball.png");
@@ -66,15 +73,32 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
 
     stbi_image_free(imageData);
 
+    // Particle state
     glGenBuffers(1, &particleRenderer->particleStateBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleStateBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, particleRenderer->particleStateBuffer);
     glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * PARTICLE_STATE_SIZE, NULL, GL_MAP_WRITE_BIT);
 
+    // Particles
     glGenBuffers(1, &particleRenderer->particleBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particleRenderer->particleBuffer);
-    glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * PARTICLE_STATE_SIZE, NULL, 0);
+    glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * PARTICLE_SIZE, NULL, 0);
+
+    // Emitter parameters
+    glGenBuffers(1, &particleRenderer->emitterParametersBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->emitterParametersBuffer);
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, particleRenderer->emitterParametersBuffer);
+    glBufferStorage(GL_SHADER_STORAGE_BUFFER, emitterCount * EMITTER_PARAMETERS_SIZE, NULL, GL_MAP_WRITE_BIT);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleStateBuffer);
+    GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
+    EmitterParameters* emitterParametersBuffer = (EmitterParameters*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, emitterCount * EMITTER_PARAMETERS_SIZE, access);
+
+    memcpy(emitterParametersBuffer, params, emitterCount * EMITTER_PARAMETERS_SIZE);
+
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+    glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
 }
 
 void particle_renderer_deinit(ParticleRenderer* particleRenderer)
@@ -83,10 +107,11 @@ void particle_renderer_deinit(ParticleRenderer* particleRenderer)
     glDeleteVertexArrays(1, &particleRenderer->VAO);
     glDeleteBuffers(1, &particleRenderer->VBO);
     glDeleteBuffers(1, &particleRenderer->particleStateBuffer);
-    shader_deleteProgram(particleRenderer->shader);
+    shader_deleteProgram(particleRenderer->drawShader);
+    shader_deleteProgram(particleRenderer->updateShader);
 }
 
-void particle_renderer_update(ParticleRenderer* particleRenderer, const ParticleState* states, int count)
+void particle_renderer_update(ParticleRenderer* particleRenderer, const ParticleState* states, int count, float timeDelta)
 {
     if (count <= 0)
     {
@@ -101,6 +126,16 @@ void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle
 
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
+
+    glUseProgram(particleRenderer->updateShader);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleBuffer);
+    glUniform1f(0, timeDelta);
+    glUniform1i(1, count);
+
+    int dispatch = (int)ceil(((double)count / 4096.0));
+
+    glDispatchCompute(dispatch, 0, 0);
 }
 
 void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* camera, int count)
@@ -110,7 +145,7 @@ void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* 
     glEnable(GL_CULL_FACE);
     glFrontFace(GL_CCW);
 
-    glUseProgram(particleRenderer->shader);
+    glUseProgram(particleRenderer->drawShader);
     glBindVertexArray(particleRenderer->VAO);
 
     mat4 viewMatrix;

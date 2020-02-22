@@ -5,19 +5,19 @@
 
 struct EmitterParameters
 {
-    vec3 direction;
-    vec3 directionVariance;
+    vec4 startColorMin;
+    vec4 startColorMax;
+    vec4 endColorMin;
+    vec4 endColorMax;
     vec2 particleLifeTime; // Min-max
     vec2 speed; // Min-max
     vec2 acceleration; // Min-max
     vec2 startSize; // Min-max
     vec2 scalingRate; // Min-max
     float emissionRate;
-    vec4 startColorMin;
-    vec4 startColorMax;
-    vec4 endColorMin;
-    vec4 endColorMax;
     float gravityModifier;
+    vec3 direction;
+    vec3 directionVariance;
 };
 typedef struct EmitterParameters EmitterParameters;
 

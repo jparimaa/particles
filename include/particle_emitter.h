@@ -11,7 +11,7 @@
 
 struct ParticleEmitter
 {
-    EmitterParameters parameters;
+    EmitterParameters* parameters;
     int startIndex;
     int particleCount;
     float timeSinceLastEmit;
