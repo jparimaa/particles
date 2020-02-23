@@ -92,7 +92,7 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, particleRenderer->emitterParametersBuffer);
     glBufferStorage(GL_SHADER_STORAGE_BUFFER, emitterCount * EMITTER_PARAMETERS_SIZE, NULL, GL_MAP_WRITE_BIT);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleStateBuffer);
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->emitterParametersBuffer);
     GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
     EmitterParameters* emitterParametersBuffer = (EmitterParameters*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, emitterCount * EMITTER_PARAMETERS_SIZE, access);
 
@@ -137,7 +137,7 @@ void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle
 
     int dispatch = (int)ceil(((double)count / 1024.0));
 
-    glDispatchCompute(dispatch, 0, 0);
+    glDispatchCompute(dispatch, 1, 1);
 }
 
 void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* camera, int count)

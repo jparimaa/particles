@@ -4,6 +4,7 @@
 #include "shader.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* emitterParameters)
 {
@@ -22,7 +23,7 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta, 
     particleEmitter->timeSinceLastEmit += timeDelta;
     int spawnCount = (int)(particleEmitter->timeSinceLastEmit / (1.0f / params->emissionRate));
 
-    int lastIndex = particleEmitter->startIndex + particleEmitter->particleCount;
+    int lastIndex = particleEmitter->startIndex + particleEmitter->maxParticleCount;
     for (int i = particleEmitter->startIndex; i < lastIndex; ++i)
     {
         ParticleState* state = &states[i];
@@ -50,6 +51,5 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta, 
 
 void particle_emitter_reset(ParticleEmitter* particleEmitter)
 {
-    particleEmitter->particleCount = 0;
     particleEmitter->timeSinceLastEmit = 0.0f;
 }

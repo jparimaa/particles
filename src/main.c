@@ -82,13 +82,24 @@ int main()
     particle_system_add_emitter(&particleSystem, &emitterParameters);
     particle_system_finalize(&particleSystem);
 
-    float previousTime = 0.0;
+    float previousTime = 0.0f;
+    float fpsTimer = 0.0f;
+    int frameCounter = 0;
 
     while (!glfwWindowShouldClose(window))
     {
         float currentTime = (float)glfwGetTime();
         float timeDelta = currentTime - previousTime;
         previousTime = currentTime;
+
+        fpsTimer += timeDelta;
+        ++frameCounter;
+        if (fpsTimer > 1.0f)
+        {
+            printf("FPS: %f\n", (float)frameCounter / fpsTimer);
+            fpsTimer = 0.0f;
+            frameCounter = 0;
+        }
 
         input_clear(&input);
         glfwPollEvents();

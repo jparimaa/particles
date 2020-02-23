@@ -16,8 +16,8 @@ struct EmitterParameters
     vec2 scalingRate; // Min-max
     float emissionRate;
     float gravityModifier;
-    vec3 direction;
-    vec3 directionVariance;
+    vec4 direction;
+    vec4 directionVariance;
 };
 typedef struct EmitterParameters EmitterParameters;
 

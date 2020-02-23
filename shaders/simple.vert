@@ -24,8 +24,7 @@ struct Particle
     vec3 position;
     float scale;
     vec3 direction;
-    float rotation;
-    float lifeTime;
+    float rotation;    
     float acceleration;
     float scalingRate;    
 };
@@ -34,7 +33,6 @@ layout (std430, binding = 1) buffer ParticleBuffer
 {
     Particle particles[];
 };
-
 
 out vec2 texCoord;
 out vec4 particleColor;

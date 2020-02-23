@@ -13,7 +13,7 @@ struct ParticleEmitter
 {
     EmitterParameters* parameters;
     int startIndex;
-    int particleCount;
+    int maxParticleCount;
     float timeSinceLastEmit;
 };
 typedef struct ParticleEmitter ParticleEmitter;

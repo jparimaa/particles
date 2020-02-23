@@ -47,8 +47,8 @@ struct EmitterParameters
     vec2 scalingRate; // Min-max
     float emissionRate;
     float gravityModifier;
-    vec3 direction;
-    vec3 directionVariance; 
+    vec4 direction;
+    vec4 directionVariance; 
 };
 
 layout (std430, binding = 2) readonly buffer EmitterParameterBuffer
@@ -59,21 +59,26 @@ layout (std430, binding = 2) readonly buffer EmitterParameterBuffer
 float randomBetweenTwoFloats(vec2 floats)
 {    
     float diff = floats.y - floats.x;    
-    float r = randoms[gl_LocalInvocationIndex % 4] * diff;
+    float r = randoms.x * diff;
     return floats.x + r;
 }
 
 vec3 randomBetweenTwoVec3s(vec3 a, vec3 b)
 {    
     vec3 diff = b - a;    
-    vec3 r = randoms[gl_LocalInvocationIndex % 4] * diff;
+    vec3 r = vec3(randoms.x * diff.x,
+                  randoms.y * diff.y,
+                  randoms.z * diff.z);
     return a + r;
 }
 
 vec4 randomBetweenTwoVec4s(vec4 a, vec4 b)
 {    
     vec4 diff = b - a;    
-    vec4 r = randoms[gl_LocalInvocationIndex % 4] * diff;
+    vec4 r = vec4(randoms.x * diff.x,
+                  randoms.y * diff.y,
+                  randoms.z * diff.z,
+                  randoms.w * diff.w);
     return a + r;
 }
 
@@ -81,10 +86,10 @@ void resetParticle(uint index)
 {
     EmitterParameters ep = emitterParameters[0];
     particles[index].color = randomBetweenTwoVec4s(ep.startColorMin, ep.startColorMax);
-    particles[index].colorChangeRate = (particles[index].color - randomBetweenTwoVec4s(ep.endColorMin, ep.endColorMax)) / particleStates[index].lifetime;
+    particles[index].colorChangeRate = (randomBetweenTwoVec4s(ep.endColorMin, ep.endColorMax) - particles[index].color) / particleStates[index].lifetime;
     particles[index].position = vec3(0.0);
     particles[index].scale = randomBetweenTwoFloats(ep.startSize);
-    particles[index].direction = ep.direction + randomBetweenTwoVec3s(-ep.directionVariance, ep.directionVariance);
+    particles[index].direction = ep.direction.xyz + randomBetweenTwoVec3s(-ep.directionVariance.xyz, ep.directionVariance.xyz);
     particles[index].rotation = 0.0;
     particles[index].acceleration = randomBetweenTwoFloats(ep.acceleration);
     particles[index].scalingRate = randomBetweenTwoFloats(ep.scalingRate);
@@ -111,9 +116,9 @@ void main()
     }
 
     vec3 gravity = vec3(0.0, -1.0, 0.0) * emitterParameters[0].gravityModifier * timeDelta;
-    particles[index].direction += gravity;
-    particles[index].direction *= particles[index].acceleration;
-    particles[index].position += particles[index].direction * timeDelta;
+    particles[index].direction.xyz += gravity;
+    particles[index].direction.xyz *= particles[index].acceleration;
+    particles[index].position += particles[index].direction.xyz * timeDelta;
     particles[index].color += particles[index].colorChangeRate * timeDelta;
     particles[index].scale += ((particles[index].scalingRate * particles[index].scale) - particles[index].scale) * timeDelta;
 }

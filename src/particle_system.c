@@ -40,8 +40,9 @@ void particle_system_finalize(ParticleSystem* system)
     {
         system->emitters[i].startIndex = particleCount;
         EmitterParameters* ep = &system->emitterParameters[i];
-        float maxCount = ep->particleLifeTime[1] / (1.0f / ep->emissionRate);
-        particleCount += (int)(maxCount + 1.0f);
+        int maxCount = (int)(ep->particleLifeTime[1] / (1.0f / ep->emissionRate) + 1.0f);
+        system->emitters[i].maxParticleCount = maxCount;
+        particleCount += maxCount;
     }
     system->maxParticleCount = particleCount;
     system->particleStates = malloc(particleCount * sizeof(ParticleState));
@@ -75,5 +76,10 @@ void particle_system_reset(ParticleSystem* system)
     for (int i = 0; i < system->emitterCount; ++i)
     {
         particle_emitter_reset(&system->emitters[i]);
+    }
+
+    for (int i = 0; i < system->maxParticleCount; ++i)
+    {
+        particle_state_init(&system->particleStates[i]);
     }
 }
