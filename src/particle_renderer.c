@@ -1,6 +1,7 @@
 #include "particle_renderer.h"
 #include "macros.h"
 #include "shader.h"
+#include "helpers.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #ifdef _MSC_VER
@@ -15,7 +16,7 @@
 #include <math.h>
 
 static const int PARTICLE_STATE_SIZE = sizeof(ParticleState);
-static const int PARTICLE_SIZE = 20 * sizeof(float);
+static const int PARTICLE_SIZE = 18 * sizeof(float);
 static const int EMITTER_PARAMETERS_SIZE = sizeof(EmitterParameters);
 
 void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount, EmitterParameters* params, int emitterCount)
@@ -49,7 +50,7 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     particleRenderer->drawShader = shader_createProgram(2, drawShaderFiles);
 
     const char* updateShaderFile[] = {CREATE_PATH(SHADER_PATH, "update.comp")};
-    particleRenderer->drawShader = shader_createProgram(1, updateShaderFile);
+    particleRenderer->updateShader = shader_createProgram(1, updateShaderFile);
 
     // Load image
     const char* imagePath = CREATE_PATH(ASSET_PATH, "ball.png");
@@ -132,8 +133,9 @@ void particle_renderer_update(ParticleRenderer* particleRenderer, const Particle
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleBuffer);
     glUniform1f(0, timeDelta);
     glUniform1i(1, count);
+    glUniform4f(2, randomZeroToOne(), randomZeroToOne(), randomZeroToOne(), randomZeroToOne());
 
-    int dispatch = (int)ceil(((double)count / 4096.0));
+    int dispatch = (int)ceil(((double)count / 1024.0));
 
     glDispatchCompute(dispatch, 0, 0);
 }

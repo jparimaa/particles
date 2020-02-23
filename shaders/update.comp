@@ -1,0 +1,119 @@
+#version 450 core
+
+layout (local_size_x = 32, local_size_y = 32, local_size_z = 1) in;
+
+layout (location = 0) uniform float timeDelta;
+layout (location = 1) uniform int particleCount;
+layout (location = 2) uniform vec4 randoms;
+
+struct ParticleState
+{
+    int status;
+    float lifetime;
+};
+
+layout (std430, binding = 0) readonly buffer ParticleStateBuffer
+{
+    ParticleState particleStates[];
+};
+
+struct Particle
+{
+    vec4 color;
+    vec4 colorChangeRate;
+    vec3 position;
+    float scale;
+    vec3 direction;
+    float rotation;    
+    float acceleration;
+    float scalingRate;    
+};
+
+layout (std430, binding = 1) buffer ParticleBuffer
+{
+    Particle particles[];
+};
+
+struct EmitterParameters
+{
+    vec4 startColorMin;
+    vec4 startColorMax;
+    vec4 endColorMin;
+    vec4 endColorMax;
+    vec2 particleLifeTime; // Min-max
+    vec2 speed; // Min-max
+    vec2 acceleration; // Min-max
+    vec2 startSize; // Min-max
+    vec2 scalingRate; // Min-max
+    float emissionRate;
+    float gravityModifier;
+    vec3 direction;
+    vec3 directionVariance; 
+};
+
+layout (std430, binding = 2) readonly buffer EmitterParameterBuffer
+{
+    EmitterParameters emitterParameters[];
+};
+
+float randomBetweenTwoFloats(vec2 floats)
+{    
+    float diff = floats.y - floats.x;    
+    float r = randoms[gl_LocalInvocationIndex % 4] * diff;
+    return floats.x + r;
+}
+
+vec3 randomBetweenTwoVec3s(vec3 a, vec3 b)
+{    
+    vec3 diff = b - a;    
+    vec3 r = randoms[gl_LocalInvocationIndex % 4] * diff;
+    return a + r;
+}
+
+vec4 randomBetweenTwoVec4s(vec4 a, vec4 b)
+{    
+    vec4 diff = b - a;    
+    vec4 r = randoms[gl_LocalInvocationIndex % 4] * diff;
+    return a + r;
+}
+
+void resetParticle(uint index)
+{
+    EmitterParameters ep = emitterParameters[0];
+    particles[index].color = randomBetweenTwoVec4s(ep.startColorMin, ep.startColorMax);
+    particles[index].colorChangeRate = (particles[index].color - randomBetweenTwoVec4s(ep.endColorMin, ep.endColorMax)) / particleStates[index].lifetime;
+    particles[index].position = vec3(0.0);
+    particles[index].scale = randomBetweenTwoFloats(ep.startSize);
+    particles[index].direction = ep.direction + randomBetweenTwoVec3s(-ep.directionVariance, ep.directionVariance);
+    particles[index].rotation = 0.0;
+    particles[index].acceleration = randomBetweenTwoFloats(ep.acceleration);
+    particles[index].scalingRate = randomBetweenTwoFloats(ep.scalingRate);
+}
+
+void main()
+{
+    uint index = gl_LocalInvocationIndex;
+    if (index >= particleCount)
+    {
+        return;
+    }
+
+    int status = particleStates[index].status;
+
+    if (status == 0)
+    {
+        return;
+    }
+
+    if (status == 1)
+    {
+        resetParticle(index);
+    }
+
+    vec3 gravity = vec3(0.0, -1.0, 0.0) * emitterParameters[0].gravityModifier * timeDelta;
+    particles[index].direction += gravity;
+    particles[index].direction *= particles[index].acceleration;
+    particles[index].position += particles[index].direction * timeDelta;
+    particles[index].color += particles[index].colorChangeRate * timeDelta;
+    particles[index].scale += ((particles[index].scalingRate * particles[index].scale) - particles[index].scale) * timeDelta;
+}
