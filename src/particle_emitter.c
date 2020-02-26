@@ -1,14 +1,14 @@
 #include "particle_emitter.h"
 #include "helpers.h"
-#include "macros.h"
-#include "shader.h"
 
 #include <stdlib.h>
-#include <stdio.h>
 
-void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* emitterParameters)
+void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* parameters, ParticleState** states, int startIndex, int count)
 {
-    particleEmitter->parameters = emitterParameters;
+    particleEmitter->parameters = parameters;
+    particleEmitter->particleStates = states;
+    particleEmitter->startIndex = startIndex;
+    particleEmitter->count = count;
     particle_emitter_reset(particleEmitter);
 }
 
@@ -16,17 +16,17 @@ void particle_emitter_deinit(ParticleEmitter* particleEmitter)
 {
 }
 
-void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta, ParticleState* states)
+void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 {
     EmitterParameters* params = particleEmitter->parameters;
 
     particleEmitter->timeSinceLastEmit += timeDelta;
     int spawnCount = (int)(particleEmitter->timeSinceLastEmit / (1.0f / params->emissionRate));
 
-    int lastIndex = particleEmitter->startIndex + particleEmitter->maxParticleCount;
+    int lastIndex = particleEmitter->startIndex + particleEmitter->count;
     for (int i = particleEmitter->startIndex; i < lastIndex; ++i)
     {
-        ParticleState* state = &states[i];
+        ParticleState* state = &(*particleEmitter->particleStates)[i];
         state->lifetime -= timeDelta;
 
         if (state->lifetime < 0.0f)
