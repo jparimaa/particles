@@ -50,6 +50,7 @@ struct EmitterParameters
     float gravityModifier;
     vec4 direction;
     vec4 directionVariance; 
+    vec4 position;
 };
 
 layout (std430, binding = 2) readonly buffer EmitterParameterBuffer
@@ -88,7 +89,7 @@ void resetParticle(uint index)
     EmitterParameters ep = emitterParameters[particles[index].emitterIndex];
     particles[index].color = randomBetweenTwoVec4s(ep.startColorMin, ep.startColorMax);
     particles[index].colorChangeRate = (randomBetweenTwoVec4s(ep.endColorMin, ep.endColorMax) - particles[index].color) / particleStates[index].lifetime;
-    particles[index].position = vec3(0.0);
+    particles[index].position = ep.position.xyz;
     particles[index].scale = randomBetweenTwoFloats(ep.startSize);
     particles[index].direction = ep.direction.xyz + randomBetweenTwoVec3s(-ep.directionVariance.xyz, ep.directionVariance.xyz);
     particles[index].rotation = 0.0;
@@ -98,7 +99,7 @@ void resetParticle(uint index)
 
 void main()
 {
-    uint index = gl_LocalInvocationIndex;
+    uint index = gl_WorkGroupID.x * 1024 + gl_LocalInvocationIndex;
     if (index >= particleCount)
     {
         return;

@@ -1,5 +1,7 @@
 #include "particle_system.h"
 
+#include <stdio.h>
+
 void particle_system_init(ParticleSystem* system, int maxEmitterCount)
 {
     system->maxEmitterCount = maxEmitterCount;
@@ -46,6 +48,7 @@ void particle_system_finalize(ParticleSystem* system)
         particleCounts[i] = maxCount;
     }
 
+    printf("Total particle count: %d\n", particleCount);
     system->maxParticleCount = particleCount;
     system->particleStates = malloc(particleCount * sizeof(ParticleState));
 

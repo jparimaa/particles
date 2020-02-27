@@ -9,8 +9,8 @@ void emitter_parameters_init(EmitterParameters* emitterParameters)
     emitterParameters->directionVariance[1] = 0.0f;
     emitterParameters->directionVariance[2] = 1.0f;
 
-    emitterParameters->particleLifeTime[0] = 10.0f;
-    emitterParameters->particleLifeTime[1] = 14.0f;
+    emitterParameters->particleLifeTime[0] = 30.0f;
+    emitterParameters->particleLifeTime[1] = 34.0f;
 
     emitterParameters->speed[0] = 0.7f;
     emitterParameters->speed[1] = 1.3f;
@@ -24,7 +24,7 @@ void emitter_parameters_init(EmitterParameters* emitterParameters)
     emitterParameters->scalingRate[0] = 1.0f;
     emitterParameters->scalingRate[1] = 1.0f;
 
-    emitterParameters->emissionRate = 5.0f;
+    emitterParameters->emissionRate = 15.0f;
 
     emitterParameters->startColorMin[0] = 0.85f;
     emitterParameters->startColorMin[1] = 0.85f;
@@ -38,4 +38,6 @@ void emitter_parameters_init(EmitterParameters* emitterParameters)
     emitterParameters->endColorMax[2] = 0.4f;
 
     emitterParameters->gravityModifier = 0.2f;
+
+    glm_vec4_zero(emitterParameters->position);
 }

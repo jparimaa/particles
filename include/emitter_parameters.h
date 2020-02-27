@@ -18,6 +18,7 @@ struct EmitterParameters
     float gravityModifier;
     vec4 direction;
     vec4 directionVariance;
+    vec4 position;
 };
 typedef struct EmitterParameters EmitterParameters;
 

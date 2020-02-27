@@ -75,12 +75,26 @@ int main()
     emitter_parameters_init(&emitterParameters);
 
     ParticleSystem particleSystem;
-    particle_system_init(&particleSystem, 2);
+    particle_system_init(&particleSystem, 4);
+
+    emitterParameters.position[1] = 2.0f;
     particle_system_add_emitter(&particleSystem, &emitterParameters);
+
     emitterParameters.direction[1] = -1.0f;
+    emitterParameters.position[1] = -2.0f;
     particle_system_add_emitter(&particleSystem, &emitterParameters);
+
+    emitterParameters.direction[0] = 1.0f;
+    emitterParameters.direction[1] = 0.0f;
+    emitterParameters.position[0] = 2.0f;
+    emitterParameters.position[1] = 0.0f;
+
     particle_system_add_emitter(&particleSystem, &emitterParameters);
+
+    emitterParameters.direction[0] = -1.0f;
+    emitterParameters.position[0] = -2.0f;
     particle_system_add_emitter(&particleSystem, &emitterParameters);
+
     particle_system_finalize(&particleSystem);
 
     float previousTime = 0.0f;
