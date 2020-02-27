@@ -5,6 +5,7 @@ void particle_system_init(ParticleSystem* system, int maxEmitterCount)
     system->maxEmitterCount = maxEmitterCount;
     system->emitterParameters = malloc(maxEmitterCount * sizeof(EmitterParameters));
     system->emitters = malloc(maxEmitterCount * sizeof(ParticleEmitter));
+    system->particleStates = NULL;
     system->emitterCount = 0;
 }
 
@@ -39,7 +40,7 @@ void particle_system_finalize(ParticleSystem* system)
     {
         EmitterParameters* ep = &system->emitterParameters[i];
         int maxCount = (int)(ep->particleLifeTime[1] / (1.0f / ep->emissionRate) + 1.0f);
-        particle_emitter_init(&system->emitters[i], &system->emitterParameters[i], &system->particleStates, particleCount, maxCount);
+        particle_emitter_init(&system->emitters[i], ep->particleLifeTime, ep->emissionRate, &system->particleStates, particleCount, maxCount);
         particleCount += maxCount;
     }
 
@@ -52,6 +53,10 @@ void particle_system_finalize(ParticleSystem* system)
     }
 
     particle_renderer_init(&system->particleRenderer, particleCount, system->emitterParameters, system->emitterCount);
+
+    // Emitter parameters copied to GPU, no need to store them here anymore.
+    free(system->emitterParameters);
+    system->emitterParameters = NULL;
 }
 
 void particle_system_update(ParticleSystem* system, float timeDelta)

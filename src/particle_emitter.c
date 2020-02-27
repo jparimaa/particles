@@ -3,9 +3,10 @@
 
 #include <stdlib.h>
 
-void particle_emitter_init(ParticleEmitter* particleEmitter, EmitterParameters* parameters, ParticleState** states, int startIndex, int count)
+void particle_emitter_init(ParticleEmitter* particleEmitter, vec2 lifetime, float emissionRate, ParticleState** states, int startIndex, int count)
 {
-    particleEmitter->parameters = parameters;
+    glm_vec3_copy(lifetime, particleEmitter->particleLifeTime);
+    particleEmitter->emissionRate = emissionRate;
     particleEmitter->particleStates = states;
     particleEmitter->startIndex = startIndex;
     particleEmitter->count = count;
@@ -18,10 +19,8 @@ void particle_emitter_deinit(ParticleEmitter* particleEmitter)
 
 void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
 {
-    EmitterParameters* params = particleEmitter->parameters;
-
     particleEmitter->timeSinceLastEmit += timeDelta;
-    int spawnCount = (int)(particleEmitter->timeSinceLastEmit / (1.0f / params->emissionRate));
+    int spawnCount = (int)(particleEmitter->timeSinceLastEmit / (1.0f / particleEmitter->emissionRate));
 
     int lastIndex = particleEmitter->startIndex + particleEmitter->count;
     for (int i = particleEmitter->startIndex; i < lastIndex; ++i)
@@ -42,7 +41,7 @@ void particle_emitter_update(ParticleEmitter* particleEmitter, float timeDelta)
         if (spawnCount > 0 && state->status == PARTICLE_STATUS_DEAD)
         {
             state->status = PARTICLE_STATUS_RESET;
-            state->lifetime = randomBetweenFloats(params->particleLifeTime[0], params->particleLifeTime[1]);
+            state->lifetime = randomBetweenFloats(particleEmitter->particleLifeTime[0], particleEmitter->particleLifeTime[1]);
             --spawnCount;
             particleEmitter->timeSinceLastEmit = 0.0f;
         }
