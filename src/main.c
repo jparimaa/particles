@@ -75,8 +75,9 @@ int main()
     emitter_parameters_init(&emitterParameters);
 
     ParticleSystem particleSystem;
-    particle_system_init(&particleSystem, 1);
+    particle_system_init(&particleSystem, 2);
     particle_system_add_emitter(&particleSystem, &emitterParameters);
+    emitterParameters.direction[1] = -1.0f;
     particle_system_add_emitter(&particleSystem, &emitterParameters);
     particle_system_add_emitter(&particleSystem, &emitterParameters);
     particle_system_add_emitter(&particleSystem, &emitterParameters);

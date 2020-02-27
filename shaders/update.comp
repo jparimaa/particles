@@ -27,6 +27,7 @@ struct Particle
     float rotation;    
     float acceleration;
     float scalingRate;    
+    int emitterIndex;
 };
 
 layout (std430, binding = 1) buffer ParticleBuffer
@@ -84,7 +85,7 @@ vec4 randomBetweenTwoVec4s(vec4 a, vec4 b)
 
 void resetParticle(uint index)
 {
-    EmitterParameters ep = emitterParameters[0];
+    EmitterParameters ep = emitterParameters[particles[index].emitterIndex];
     particles[index].color = randomBetweenTwoVec4s(ep.startColorMin, ep.startColorMax);
     particles[index].colorChangeRate = (randomBetweenTwoVec4s(ep.endColorMin, ep.endColorMax) - particles[index].color) / particleStates[index].lifetime;
     particles[index].position = vec3(0.0);
@@ -115,7 +116,7 @@ void main()
         resetParticle(index);
     }
 
-    vec3 gravity = vec3(0.0, -1.0, 0.0) * emitterParameters[0].gravityModifier * timeDelta;
+    vec3 gravity = vec3(0.0, -1.0, 0.0) * emitterParameters[particles[index].emitterIndex].gravityModifier * timeDelta;
     particles[index].direction.xyz += gravity;
     particles[index].direction.xyz *= particles[index].acceleration;
     particles[index].position += particles[index].direction.xyz * timeDelta;

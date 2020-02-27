@@ -15,11 +15,25 @@
 
 #include <math.h>
 
+struct Particle
+{
+    vec4 color;
+    vec4 colorChangeRate;
+    vec3 position;
+    float scale;
+    vec3 direction;
+    float rotation;
+    float acceleration;
+    float scalingRate;
+    int emitterIndex;
+};
+typedef struct Particle Particle;
+
 static const int PARTICLE_STATE_SIZE = sizeof(ParticleState);
-static const int PARTICLE_SIZE = 18 * sizeof(float);
+static const int PARTICLE_SIZE = sizeof(Particle);
 static const int EMITTER_PARAMETERS_SIZE = sizeof(EmitterParameters);
 
-void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount, EmitterParameters* params, int emitterCount)
+void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleCount, EmitterParameters* params, int emitterCount, int* particleCounts)
 {
     // clang-format off
     float vertices[] = {
@@ -74,6 +88,8 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
 
     stbi_image_free(imageData);
 
+    const GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
+
     // Particle state
     glGenBuffers(1, &particleRenderer->particleStateBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleStateBuffer);
@@ -84,7 +100,21 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     glGenBuffers(1, &particleRenderer->particleBuffer);
     glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->particleBuffer);
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, particleRenderer->particleBuffer);
-    glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * PARTICLE_SIZE, NULL, 0);
+    glBufferStorage(GL_SHADER_STORAGE_BUFFER, maxParticleCount * PARTICLE_SIZE, NULL, GL_MAP_WRITE_BIT);
+
+    Particle* particlesBuffer = (Particle*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, maxParticleCount * PARTICLE_SIZE, access);
+    int particleIndex = 0;
+    int emitterIndex = 0;
+    for (int i = 0; i < emitterCount; ++i)
+    {
+        for (int j = 0; j < particleCounts[i]; ++j)
+        {
+            particlesBuffer[particleIndex].emitterIndex = emitterIndex;
+            ++particleIndex;
+        }
+        ++emitterIndex;
+    }
+    glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 
     // Emitter parameters
     glGenBuffers(1, &particleRenderer->emitterParametersBuffer);
@@ -92,13 +122,10 @@ void particle_renderer_init(ParticleRenderer* particleRenderer, int maxParticleC
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, particleRenderer->emitterParametersBuffer);
     glBufferStorage(GL_SHADER_STORAGE_BUFFER, emitterCount * EMITTER_PARAMETERS_SIZE, NULL, GL_MAP_WRITE_BIT);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, particleRenderer->emitterParametersBuffer);
-    GLbitfield access = GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT;
     EmitterParameters* emitterParametersBuffer = (EmitterParameters*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, emitterCount * EMITTER_PARAMETERS_SIZE, access);
-
     memcpy(emitterParametersBuffer, params, emitterCount * EMITTER_PARAMETERS_SIZE);
-
     glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+
     glMemoryBarrier(GL_CLIENT_MAPPED_BUFFER_BARRIER_BIT);
 }
 
@@ -156,7 +183,7 @@ void particle_renderer_render(ParticleRenderer* particleRenderer, const Camera* 
     camera_getProjectionMatrix(camera, projectionMatrix);
 
     mat4 viewProjectionMatrix;
-    glm_mat4_mulN((mat4* []){&projectionMatrix, &viewMatrix}, 2, viewProjectionMatrix);
+    glm_mat4_mulN((mat4*[]){&projectionMatrix, &viewMatrix}, 2, viewProjectionMatrix);
 
     glUniformMatrix4fv(0, 1, 0, viewProjectionMatrix[0]);
     glUniform3f(1, viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
