@@ -1,6 +1,8 @@
-# particles
+# Particles
 
-Simple particle system example written in C99.
+Simple particle system written in C99 & OpenGL 4.5. All the particle data is located only on GPU memory and particles are updated using compute pipeline. Rendering is done with a single instanced draw call.
+
+Particle parameters include start and end color, lifetime, start speed, acceleration, start size, scaling rate, emission rate, gravity, direction and position.
 
 ## Build
 
